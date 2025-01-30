@@ -1,0 +1,21 @@
+/* تحسين تأثير hover على البطاقة */
+.field-card {
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s;
+    background-color: #ecf0f1;
+    border: none;
+    border-radius: 10px;
+  }
+  
+  .field-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+  }
+  
+  /* صورة البطاقة */
+  .card-image {
+    height: 180px;
+    object-fit: cover;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+  }
+  

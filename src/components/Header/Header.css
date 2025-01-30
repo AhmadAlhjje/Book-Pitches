@@ -1,0 +1,131 @@
+.custom-navbar {
+  background-color: #1abc9c; /* لون أخضر هادئ يناسب الموقع الرياضي */
+  padding: 10px 20px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* إضافة ظل */
+  font-family: 'Cairo', sans-serif; /* استخدام خط جميل */
+}
+
+.custom-navbar .navbar-brand {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: #ffffff;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.custom-navbar .navbar-brand:hover {
+  color: #16a085; /* تغيير لون العلامة التجارية عند التمرير */
+}
+
+.custom-navbar .dropdown-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: bold;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.custom-navbar .dropdown-toggle:hover {
+  color: #f1c40f; /* لون ذهبي عند التمرير */
+}
+
+.custom-navbar .dropdown-menu {
+  background-color: #ffffff;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+  padding: 5px 0;
+  animation: fadeIn 0.3s ease-in-out; /* إضافة تأثير عند الظهور */
+}
+
+.custom-navbar .dropdown-item {
+  color: #333;
+  font-weight: bold;
+  padding: 10px 15px;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.custom-navbar .dropdown-item:hover {
+  background-color: #1abc9c;
+  color: #ffffff;
+}
+
+.custom-navbar .btn-outline-light {
+  color: #ffffff;
+  border: 2px solid #ffffff;
+  font-weight: bold;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.custom-navbar .btn-outline-light:hover {
+  background-color: #ffffff;
+  color: #1abc9c;
+}
+
+.custom-navbar .btn-outline-success {
+  color: #ffffff;
+  border: 2px solid #2ecc71;
+  font-weight: bold;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.custom-navbar .btn-outline-success:hover {
+  background-color: #2ecc71;
+  color: #ffffff;
+}
+
+/* تأثير Fade-In */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* تحسين التنسيق عند تصغير الشاشة */
+@media (max-width: 992px) {
+  .custom-navbar .navbar-nav {
+    width: 100%;
+    display: flex;
+    justify-content: flex-start;
+  }
+
+  .custom-navbar .dropdown-toggle {
+    margin-left: auto;
+  }
+
+  .custom-navbar .dropdown-menu {
+    width: 100%;
+  }
+
+  .custom-navbar .btn-outline-light,
+  .custom-navbar .btn-outline-success {
+    margin-top: 10px;
+    width: 100%;
+  }
+}
+.no-underline {
+  text-decoration: none;
+}
+.site-name {
+  text-align: center;
+  font-family: 'Poppins', sans-serif; /* غيّر الخط حسب الحاجة */
+  font-weight: bold;
+  font-style: italic;
+  transform: skewX(-15deg); /* زيادة الميلان */
+  line-height: 1;
+}
+
+.site-name .small-text {
+  font-size: 0.85em;
+  display: block;
+  margin-top: -5px;
+  transform: skewX(-10deg); /* تطبيق نفس الميلان */
+}
+
+

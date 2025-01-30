@@ -1,0 +1,68 @@
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
+
+/* تطبيق الخط الجديد */
+body, .profile-page {
+  font-family: 'Cairo', sans-serif;
+}
+
+/* تحسين لون النصوص */
+.text-white {
+  color: #f1f1f1 !important;
+}
+
+/* تحسين التنسيق العام للصفحة */
+.profile-page {
+  background-color: #121212;
+  padding: 20px;
+  border-radius: 10px;
+  color: #e0e0e0;
+  margin-top: 20px;
+}
+
+/* العناوين */
+h2, h3 {
+  font-weight: 700;
+  color: #ffd700;
+}
+
+/* التحسينات الخاصة بالـ Containers */
+hr {
+  border: 1px solid #444;
+}
+
+/* تحسين زر تغيير الصورة */
+.profile-image-change {
+  background-color: rgba(255, 215, 0, 0.8);
+  color: #000;
+  font-weight: 600;
+  padding: 8px 12px;
+  border-radius: 50%;
+  transition: background-color 0.3s ease;
+}
+
+.profile-image-change:hover {
+  background-color: rgba(255, 215, 0, 1);
+}
+
+/* تحسين الأزرار */
+button, .btn-primary {
+  background-color: #007bff;
+  border: none;
+  color: #fff;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
+}
+
+button:hover, .btn-primary:hover {
+  background-color: #0056b3;
+}
+
+.btn-success {
+  background-color: #28a745;
+  border: none;
+  font-weight: 600;
+}
+
+.btn-success:hover {
+  background-color: #218838;
+}

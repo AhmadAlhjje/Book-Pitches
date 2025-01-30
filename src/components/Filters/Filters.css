@@ -1,0 +1,32 @@
+/* .filters {
+    background-color: #f9f9f9; 
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  }
+
+  
+  .filters .form-control,
+  .filters .form-select {
+    border: 1px solid #dcdde1;
+    border-radius: 5px;
+  }
+  
+  .filters .btn-success {
+    background-color: #27ae60;
+    border: none;
+    font-size: 1rem;
+    padding: 10px 20px;
+    transition: background-color 0.3s ease;
+  }
+  
+  .filters .btn-success:hover {
+    background-color: #1e8449;
+  }
+   */
+     
+  .FormLabel {
+    font-size: 1.5rem;
+    color: #ffffff; /* لون داكن يناسب الخلفية */
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5); /* إضافة ظل خفيف للنص */    
+  }

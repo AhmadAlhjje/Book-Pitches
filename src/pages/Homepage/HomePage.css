@@ -1,0 +1,38 @@
+.home-container {
+  padding: 20px;
+  /* background-color: #f4f6f7;  */
+  background: url(../../image/u.jpg) no-repeat center center;/* صورة الخلفية*/
+  opacity: 78%;
+  background-size: cover; /* تكبير الصورة لتغطية كامل المساحة */
+}
+
+.title {
+  font-size: 2rem;
+  color: #ffffff;
+  margin-bottom: 30px;
+}
+
+.text-center .btn {
+  font-size: 1rem;
+  padding: 10px 20px;
+  margin: 5px;
+  border-radius: 5px;
+}
+
+.text-center .btn-success {
+  background-color: #1abc9c;
+  border: none;
+}
+
+.text-center .btn-danger {
+  background-color: #e74c3c;
+  border: none;
+}
+
+.text-center .btn-success:hover {
+  background-color: #16a085;
+}
+
+.text-center .btn-danger:hover {
+  background-color: #c0392b;
+}

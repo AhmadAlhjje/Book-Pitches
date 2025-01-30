@@ -1,0 +1,37 @@
+/* تنسيقات الحاوية الخاصة بالملف الشخصي */
+.profile-header {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  /* تنسيق الصورة الشخصية */
+  .profile-image-container {
+    position: relative;
+    display: inline-block;
+  }
+  
+  .profile-image {
+    border-radius: 50%;
+    border: 5px solid #fff;
+    object-fit: cover;
+    margin-bottom: 10px;
+  }
+  
+  /* تنسيق زر تغيير الصورة */
+  .profile-image-change {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    background-color: rgba(255, 215, 0, 0.8);
+    color: #000;
+    font-weight: 600;
+    padding: 8px 12px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .profile-image-change:hover {
+    background-color: rgba(255, 215, 0, 1);
+  }
+  

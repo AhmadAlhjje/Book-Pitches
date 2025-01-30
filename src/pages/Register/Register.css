@@ -1,0 +1,32 @@
+.register-container {
+    background: linear-gradient(to right, #1e3c72, #2a5298);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .register-box {
+    background-color: rgba(255, 255, 255, 0.1);
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.5);
+    width: 100%;
+    max-width: 400px;
+  }
+  
+  .text-white {
+    color: #ffffff;
+  }
+  
+  .register-box input {
+    background-color: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: #ffffff;
+    outline: none;
+  }
+  
+  .register-box input::placeholder {
+    color: #dcdcdc;
+  }
+  

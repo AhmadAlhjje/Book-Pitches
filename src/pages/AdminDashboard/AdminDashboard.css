@@ -1,0 +1,217 @@
+/* تنسيق عام */
+body {
+  background-color: #282c34;
+  color: #fff;
+  font-family: 'Arial', sans-serif;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden; /* منع التمرير الأفقي */
+  position: relative;
+}
+
+/* تقييد العرض والتنسيق على الشاشات الصغيرة */
+.container {
+  max-width: 100%;
+  margin: auto;
+  padding: 10px;
+}
+
+/* التنسيق الرئيسي */
+h4 {
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+  color: #f8f9fa;
+  text-align: center;
+}
+
+/* تعديل الجدول ليتناسب مع الشاشات الصغيرة */
+.table {
+  background-color: #343a40;
+  border-radius: 8px;
+  overflow: hidden;
+  width: 100%;
+  table-layout: fixed;
+}
+
+.table th, .table td {
+  text-align: center;
+  vertical-align: middle;
+  font-size: 0.9rem;
+  padding: 8px;
+  border: 1px solid #555;
+}
+
+.table th {
+  background-color: #495057;
+  color: #f8f9fa;
+}
+
+.table td {
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+}
+
+.table td.bg-danger {
+  background-color: #d9534f;
+  color: #fff;
+  font-weight: bold;
+}
+
+.table td.bg-success {
+  background-color: #5cb85c;
+  color: #fff;
+  font-weight: bold;
+}
+
+.table td:hover {
+  background-color: #007bff;
+  color: #fff;
+  transform: scale(1.1);
+}
+
+/* تنسيق الأزرار */
+button {
+  font-size: 1rem;
+  padding: 10px 15px;
+  border-radius: 5px;
+  margin: 5px;
+  transition: all 0.3s ease-in-out;
+}
+
+button:hover {
+  transform: scale(1.05);
+  opacity: 0.9;
+}
+
+button:focus {
+  outline: none;
+  box-shadow: 0 0 5px #fff;
+}
+
+button.btn-primary {
+  background-color: #007bff;
+  border-color: #007bff;
+}
+
+button.btn-primary:hover {
+  background-color: #0056b3;
+}
+
+button.btn-success {
+  background-color: #28a745;
+  border-color: #28a745;
+}
+
+button.btn-success:hover {
+  background-color: #1e7e34;
+}
+
+button.btn-secondary {
+  background-color: #6c757d;
+  border-color: #6c757d;
+}
+
+button.btn-secondary:hover {
+  background-color: #5a6268;
+}
+
+/* لتنسيق النموذج */
+form input, form select, form textarea {
+  background-color: #495057;
+  color: #f8f9fa;
+  border: 1px solid #6c757d;
+  border-radius: 5px;
+  padding: 10px;
+  font-size: 0.9rem;
+}
+
+form input:focus, form select:focus, form textarea:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+  outline: none;
+}
+
+/* تحسين تصميم المودال */
+.modal-content {
+  background-color: #343a40;
+  border: 1px solid #495057;
+  border-radius: 10px;
+}
+
+.modal-header, .modal-footer {
+  border: none;
+}
+
+.modal-title {
+  color: #f8f9fa;
+}
+
+.modal-body {
+  color: #adb5bd;
+}
+
+.modal-body label {
+  color: #f8f9fa;
+}
+
+.modal-footer button {
+  margin: 0 10px;
+}
+
+/* تنسيق لأجهزة الموبايل */
+@media (max-width: 768px) {
+  .table th, .table td {
+      font-size: 0.8rem;
+      padding: 5px;
+  }
+
+  h4 {
+      font-size: 1.2rem;
+  }
+
+  .container {
+      padding: 10px;
+  }
+
+  /* أزرار ثابتة في أسفل الشاشة على الأجهزة الصغيرة */
+  .d-flex {
+      position: fixed;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1000;
+      background-color: #343a40;
+      padding: 10px;
+      border-radius: 10px;
+  }
+
+  .btn-success {
+      padding: 12px 18px;
+  }
+}
+
+@media (max-width: 480px) {
+  .table th, .table td {
+      font-size: 0.7rem;
+      padding: 4px;
+  }
+
+  .container {
+      padding: 5px;
+  }
+
+  h4 {
+      font-size: 1rem;
+  }
+
+  .d-flex {
+      position: fixed;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1000;
+      width: 90%;
+  }
+}
+
+

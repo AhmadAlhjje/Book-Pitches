@@ -1,0 +1,136 @@
+/* CSS لتنسيق صفحة الحجز مع تصميم بسيط ومناسب لحجز ملاعب كرة القدم */
+.booking-page {
+  min-height: 100vh;
+  background: #f7f7f7; /* خلفية رمادية فاتحة مريحة للعين */
+  color: #333; /* النصوص بلون داكن مريح للقراءة */
+  font-family: 'Arial', sans-serif; /* خط بسيط ومريح للقراءة */
+}
+
+/* التصميم الخاص ببطاقة الحجز */
+.booking-card {
+  background: #ffffff; /* لون خلفية أبيض */
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1);
+  margin: 20px;
+}
+
+.booking-card h2 {
+  color: #007bff; /* لون أزرق مريح للنظر */
+  font-size: 24px;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.booking-card p {
+  color: #555; /* لون رمادي داكن للنصوص الثانوية */
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+/* تنسيق التقويم */
+.react-calendar {
+  background: transparent; /* إزالة الخلفية الافتراضية */
+  border: none; /* إزالة الحدود */
+  width: 100%;
+}
+
+.react-calendar__tile {
+  border-bottom: 1px solid #ddd; /* خطوط بين الأيام */
+  color: #333; /* لون النصوص */
+  padding: 10px;
+  text-align: center;
+}
+
+.react-calendar__tile:enabled:hover {
+  background: #f0f0f0; /* لون فاتح عند التمرير */
+}
+
+.react-calendar__tile--now {
+  background: #007bff; /* لون مميز للتاريخ الحالي */
+  color: #fff; /* لون نص أبيض للتباين */
+}
+
+.react-calendar__tile--active {
+  background: #0056b3; /* لون أغمق للتاريخ النشط */
+  color: #fff;
+}
+
+/* تنسيق اختيار الوقت */
+.booking-card .form-label {
+  color: #007bff; /* لون أزرق مريح للنظر */
+  font-size: 16px;
+  margin-bottom: 5px;
+}
+
+.booking-card .form-control {
+  background: #f0f0f0; /* خلفية فاتحة للحقل */
+  color: #333; /* لون النصوص */
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.booking-card .btn {
+  background: #007bff; /* زر أزرق مميز */
+  color: #fff; /* لون نص أبيض */
+  font-weight: bold;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px;
+  transition: all 0.3s ease;
+}
+
+.booking-card .btn:hover {
+  background: #0056b3; /* لون أغمق عند التمرير */
+}
+
+/* الرسالة التنبيهية */
+.confirmation-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.confirmation-box {
+  background: #fff; /* خلفية بيضاء */
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.confirmation-box.error {
+  background-color: #f8d7da; /* لون أحمر فاتح للأخطاء */
+  color: #721c24;
+}
+
+.confirmation-box.success {
+  background-color: #d4edda; /* لون أخضر فاتح للنجاح */
+  color: #155724;
+}
+
+/* تصميم Responsive */
+@media (max-width: 768px) {
+  .booking-card {
+    padding: 15px;
+  }
+
+  .booking-card h2 {
+    font-size: 20px;
+  }
+
+  .booking-card .form-label {
+    font-size: 14px;
+  }
+
+  .booking-card .btn {
+    font-size: 14px;
+  }
+}

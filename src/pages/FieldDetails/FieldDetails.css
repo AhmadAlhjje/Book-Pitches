@@ -1,0 +1,35 @@
+/* الحاوية الرئيسية */
+.field-details-container {
+  background-color: #1c1c1c;
+  border-radius: 10px;
+  padding: 20px;
+}
+
+/* تنسيقات Carousel */
+.field-carousel {
+  border-radius: 10px;
+}
+
+.carousel-image {
+  height: 400px;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+/* معلومات الملعب */
+.field-info {
+  background-color: #2c2c2c;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+.field-name {
+  color: #00ff6a;
+}
+
+.field-description,
+.field-location,
+.field-price {
+  font-size: 16px;
+  margin-bottom: 10px;
+}

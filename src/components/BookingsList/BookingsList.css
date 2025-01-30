@@ -1,0 +1,36 @@
+/* تنسيق البطاقات الخاصة بالحجوزات */
+.card {
+    background-color: #1e1e1e;
+    border: 1px solid #444;
+    color: #fff;
+    margin-bottom: 15px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  }
+  
+  /* تحسين حالة الحجز */
+  .bg-danger {
+    background-color: #dc3545 !important; /* أحمر للحجوزات المنتهية */
+    color: #fff !important;
+  }
+  
+  .bg-success {
+    background-color: #28a745 !important; /* أخضر للحجوزات القادمة */
+    color: #fff !important;
+  }
+  
+  /* تحسين نصوص البطاقات */
+  .card-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
+  
+  .card-text {
+    font-size: 1rem;
+    color: #f8f9fa;
+  }
+  
