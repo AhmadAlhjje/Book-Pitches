@@ -27,7 +27,6 @@ const AdminDashboard = () => {
       try {
         const token = localStorage.getItem('token');
         if (!token) return;
-
         const userId = JSON.parse(atob(token.split('.')[1])).id;
 
         // جلب بيانات الملعب من الخادم
@@ -35,7 +34,6 @@ const AdminDashboard = () => {
           headers: { 'Authorization': `Bearer ${token}` },
         });
         const fieldData = await fieldResponse.json();
-
         setFieldDetails(prev => ({
           ...prev,
           fieldId: fieldData.field_id,
@@ -52,7 +50,6 @@ const AdminDashboard = () => {
         });
         const bookingsData = await bookingsResponse.json();
         setBookings(bookingsData);
-
         setFieldName(fieldData.name);
       } catch (error) {
         console.error('فشل في جلب بيانات الملعب والحجوزات:', error);
@@ -190,7 +187,7 @@ const AdminDashboard = () => {
         headers: { 'Authorization': `Bearer ${token}` },
         body: formData,
       });
-
+      
       if (response.ok) {
         setShowEditModal(false);
         setError('');
@@ -217,6 +214,7 @@ const AdminDashboard = () => {
 
   return (
     <Container className="mt-4 text-white">
+      {/* عرض اسم الملعب في المنتصف */}
       <h2 className="text-center mb-3" style={{ fontWeight: 'bold' }}>{fieldName}</h2>
 
       <div className="d-flex justify-content-between mb-3">

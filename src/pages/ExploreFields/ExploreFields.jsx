@@ -8,6 +8,7 @@ const ExploreFields = () => {
   const [filteredRegions, setFilteredRegions] = useState([]); // تخزين المناطق المفلترة حسب المدينة
   const [showModal, setShowModal] = useState(false); // حالة عرض نافذة إضافة ملعب جديد
   const [showDeleteModal, setShowDeleteModal] = useState(false); // حالة عرض نافذة تأكيد الحذف
+  const [showErrorModal, setShowErrorModal] = useState(false); // حالة عرض نافذة الخطأ
   const [fieldToDelete, setFieldToDelete] = useState(null); // تخزين الملعب الذي سيتم حذفه
   const [newField, setNewField] = useState({
     name: '',
@@ -40,7 +41,10 @@ const ExploreFields = () => {
         setRegions(regionsData);
         setCities(citiesData);
       })
-      .catch((error) => console.error('خطأ أثناء جلب البيانات:', error));
+      .catch((error) => {
+        console.error('خطأ أثناء جلب البيانات:', error);
+        setShowErrorModal(true); // عرض نافذة الخطأ
+      });
   }, []);
 
   // التعامل مع تغيير المدخلات في نموذج إضافة الملعب
@@ -70,57 +74,53 @@ const ExploreFields = () => {
   };
 
   // إضافة ملعب جديد إلى النظام
-  const addField = () => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      console.error('لم يتم العثور على الرمز. يرجى تسجيل الدخول.');
-      return;
-    }
+  // إضافة ملعب جديد إلى النظام
+const addField = (e) => {
+  e.preventDefault();  // منع التحديث التلقائي للصفحة
 
-    const formData = new FormData();
-    formData.append('name', newField.name);
-    formData.append('region_id', newField.region_id);
-    formData.append('details', newField.details);
-    formData.append('city_id', newField.city_id);
-    formData.append('phone_number', newField.phone_number);
+  const token = localStorage.getItem('token');
+  if (!token) {
+    console.error('لم يتم العثور على الرمز. يرجى تسجيل الدخول.');
+    return;
+  }
 
-    // إضافة الصور إذا كانت موجودة
-    if (newField.image1) formData.append('image1', newField.image1);
-    if (newField.image2) formData.append('image2', newField.image2);
-    if (newField.image3) formData.append('image3', newField.image3);
-    if (newField.image4) formData.append('image4', newField.image4);
+  const formData = new FormData();
+  formData.append('name', newField.name);
+  formData.append('region_id', newField.region_id);
+  formData.append('details', newField.details);
+  formData.append('city_id', newField.city_id);
+  formData.append('phone_number', newField.phone_number);
 
-    // إرسال البيانات إلى الخادم
-    fetch('http://localhost:4000/fields', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      body: formData,
+  // إضافة الصور إذا كانت موجودة
+  if (newField.image1) formData.append('image1', newField.image1);
+  if (newField.image2) formData.append('image2', newField.image2);
+  if (newField.image3) formData.append('image3', newField.image3);
+  if (newField.image4) formData.append('image4', newField.image4);
+
+  // إرسال البيانات إلى الخادم
+  fetch('http://localhost:4000/fields', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: formData,
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error('فشل في إضافة الملعب');
+      }
+      return response.json();
     })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error('فشل في إضافة الملعب');
-        }
-        return response.json();
-      })
-      .then((addedField) => {
-        setFields((prevFields) => [...prevFields, addedField]);
-        setShowModal(false);
-        setNewField({
-          name: '',
-          region_id: '',
-          city_id: '',
-          phone_number: '',
-          details: '',
-          image1: null,
-          image2: null,
-          image3: null,
-          image4: null,
-        });
-      })
-      .catch((error) => console.error('خطأ:', error));
-  };
+    .then(() => {
+      // إعادة تحميل الصفحة
+      window.location.reload();  // إعادة تحميل الصفحة
+    })
+    .catch((error) => {
+      console.error('خطأ:', error);
+      setShowErrorModal(true); // عرض نافذة الخطأ
+    });
+};
+
 
   // حذف الملعب من النظام
   const deleteField = (field_id) => {
@@ -230,6 +230,37 @@ const ExploreFields = () => {
           </Button>
           <Button variant="danger" onClick={confirmDeleteField}>
             تأكيد الحذف
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* نافذة الخطأ */}
+      <Modal show={showErrorModal} onHide={() => setShowErrorModal(false)} size="sm">
+        <Modal.Header closeButton>
+          <Modal.Title>
+            <span style={{ color: '#dc3545' }}>❗</span> خطأ
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <div
+            style={{
+              color: '#721c24', // اللون الأحمر
+              backgroundColor: '#f8d7da', // خلفية فاتحة للخطأ
+              padding: '15px',
+              borderRadius: '8px',
+              fontWeight: 'bold',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+            }}
+          >
+            <span style={{ fontSize: '20px' }}>❌</span>
+            <span>الشخص غير موجود أو حدث خطأ في الخادم</span>
+          </div>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="danger" onClick={() => setShowErrorModal(false)}>
+            إغلاق
           </Button>
         </Modal.Footer>
       </Modal>
