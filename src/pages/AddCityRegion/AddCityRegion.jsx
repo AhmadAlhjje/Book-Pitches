@@ -29,7 +29,6 @@ const AddCityRegion = () => {
 
     fetchCities();
   }, []);
-
   // إضافة مدينة جديدة
   const handleAddCity = async (e) => {
     e.preventDefault();

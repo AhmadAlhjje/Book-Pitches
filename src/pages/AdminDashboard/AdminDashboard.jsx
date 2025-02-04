@@ -28,37 +28,45 @@ const AdminDashboard = () => {
         const token = localStorage.getItem('token');
         if (!token) return;
         const userId = JSON.parse(atob(token.split('.')[1])).id;
-
-        // جلب بيانات الملعب من الخادم
+  
+        // جلب بيانات الملعب الخاص بالمستخدم
         const fieldResponse = await fetch(`http://localhost:4000/field_owners/field_by_user/${userId}`, {
           headers: { 'Authorization': `Bearer ${token}` },
         });
         const fieldData = await fieldResponse.json();
+        
+        // جلب جميع الملاعب من API
+        const fieldsResponse = await fetch('http://localhost:4000/fields');
+        const fieldsData = await fieldsResponse.json();
+  
+        // البحث عن اسم الملعب المطابق
+        const matchedField = fieldsData.find(field => field.field_id === fieldData.field_id);
+  
         setFieldDetails(prev => ({
           ...prev,
           fieldId: fieldData.field_id,
-          name: fieldData.name,
+          name: matchedField ? matchedField.name : 'غير معروف',
           description: fieldData.description,
           image: fieldData.image || null,
         }));
-
-        const fieldId = fieldData.field_id;
-
+  
         // جلب الحجوزات الخاصة بالملعب
-        const bookingsResponse = await fetch(`http://localhost:4000/reservations/field/${fieldId}`, {
+        const bookingsResponse = await fetch(`http://localhost:4000/reservations/field/${fieldData.field_id}`, {
           headers: { 'Authorization': `Bearer ${token}` },
         });
         const bookingsData = await bookingsResponse.json();
         setBookings(bookingsData);
-        setFieldName(fieldData.name);
+        setFieldName(matchedField ? matchedField.name : 'غير معروف');
+  
       } catch (error) {
         console.error('فشل في جلب بيانات الملعب والحجوزات:', error);
         setError('فشل في جلب بيانات الملعب والحجوزات.');
       }
     };
-
+  
     fetchFieldAndBookings();
   }, []);
+  
 
   const getWeekStart = (date) => {
     const day = date.getDay();
@@ -82,6 +90,20 @@ const AdminDashboard = () => {
   const isBookingAvailable = (day, hour) => {
     return !bookings.some(booking => booking.date === day && booking.time === hour);
   };
+
+  const handleBookingChange = (e) => {
+    const { name, value } = e.target;
+    setNewBooking(prev => ({ ...prev, [name]: value }));
+  
+    if (newBooking.day && newBooking.hour) {
+      const available = isBookingAvailable(newBooking.day, newBooking.hour);
+      if (!available) {
+        setError('هذا الموعد محجوز مسبقًا. يرجى اختيار موعد آخر.');
+      } else {
+        setError('');
+      }
+    }
+  };  
 
   const handleAddBooking = async (e) => {
     e.preventDefault();
@@ -217,6 +239,7 @@ const AdminDashboard = () => {
       {/* عرض اسم الملعب في المنتصف */}
       <h2 className="text-center mb-3" style={{ fontWeight: 'bold' }}>{fieldName}</h2>
 
+
       <div className="d-flex justify-content-between mb-3">
         <Button variant="secondary" onClick={() => handleWeekChange(-1)}>الأسبوع السابق</Button>
         <Button variant="success" onClick={() => setShowModal(true)}>إضافة حجز</Button>
@@ -297,7 +320,9 @@ const AdminDashboard = () => {
                 ))}
               </Form.Control>
             </Form.Group>
-            <Button type="submit" variant="success" className="mt-3">حجز</Button>
+            <Button type="submit" variant="success" className="mt-3" disabled={!isBookingAvailable(newBooking.day, newBooking.hour)}>
+              حجز
+            </Button>
           </Form>
         </Modal.Body>
       </Modal>
