@@ -9,6 +9,8 @@ const AdminDashboard = () => {
 
   const [currentWeek, setCurrentWeek] = useState(new Date());
   const [bookings, setBookings] = useState([]);
+  const [fields, setFields] = useState([]);
+  const [selectedField, setSelectedField] = useState(null);
   const [fieldName, setFieldName] = useState('');
   const [fieldDetails, setFieldDetails] = useState({
     name: '',
@@ -23,50 +25,39 @@ const AdminDashboard = () => {
   const [showEditModal, setShowEditModal] = useState(false);
 
   useEffect(() => {
-    const fetchFieldAndBookings = async () => {
+    const fetchFieldsAndBookings = async () => {
       try {
         const token = localStorage.getItem('token');
         if (!token) return;
         const userId = JSON.parse(atob(token.split('.')[1])).id;
   
-        // جلب بيانات الملعب الخاص بالمستخدم
-        const fieldResponse = await fetch(`http://localhost:4000/field_owners/field_by_user/${userId}`, {
+        // جلب جميع الملاعب الخاصة بالمستخدم
+        const fieldsResponse = await fetch(`http://localhost:4000/field_owners/fields_by_user/${userId}`, {
           headers: { 'Authorization': `Bearer ${token}` },
         });
-        const fieldData = await fieldResponse.json();
-        
-        // جلب جميع الملاعب من API
-        const fieldsResponse = await fetch(`http://localhost:4000/fields/${fieldData.field_id}`);
         const fieldsData = await fieldsResponse.json();
   
-        // البحث عن اسم الملعب المطابق
-        const matchedField = fieldsData;
+        setFields(fieldsData);
+        setSelectedField(fieldsData[0]); // تعيين أول ملعب كمختار افتراضي
   
-        setFieldDetails(prev => ({
-          ...prev,
-          fieldId: fieldData.field_id,
-          name: matchedField ? matchedField.name : 'غير معروف',
-          description: fieldData.description,
-          image: fieldData.image || null,
-        }));
-  
-        // جلب الحجوزات الخاصة بالملعب
-        const bookingsResponse = await fetch(`http://localhost:4000/reservations/field/${fieldData.field_id}`, {
-          headers: { 'Authorization': `Bearer ${token}` },
-        });
-        const bookingsData = await bookingsResponse.json();
-        setBookings(bookingsData);
-        setFieldName(matchedField ? matchedField.name : 'غير معروف');
+        // جلب الحجوزات الخاصة بالملعب المختار
+        if (fieldsData.length > 0) {
+          const fieldId = fieldsData[0].field_id;
+          const bookingsResponse = await fetch(`http://localhost:4000/reservations/field/${fieldId}`, {
+            headers: { 'Authorization': `Bearer ${token}` },
+          });
+          const bookingsData = await bookingsResponse.json();
+          setBookings(bookingsData);
+        }
   
       } catch (error) {
-        console.error('فشل في جلب بيانات الملعب والحجوزات:', error);
-        setError('فشل في جلب بيانات الملعب والحجوزات.');
+        console.error('فشل في جلب بيانات الملاعب والحجوزات:', error);
+        setError('فشل في جلب بيانات الملاعب والحجوزات.');
       }
     };
   
-    fetchFieldAndBookings();
+    fetchFieldsAndBookings();
   }, []);
-  
 
   const getWeekStart = (date) => {
     const day = date.getDay();
@@ -103,7 +94,7 @@ const AdminDashboard = () => {
         setError('');
       }
     }
-  };  
+  };
 
   const handleAddBooking = async (e) => {
     e.preventDefault();
@@ -127,7 +118,7 @@ const AdminDashboard = () => {
       }
 
       const userId = JSON.parse(atob(token.split('.')[1])).id;
-      const fieldId = fieldDetails.fieldId;
+      const fieldId = selectedField.field_id;
 
       const bookingData = {
         time: hour,
@@ -194,7 +185,7 @@ const AdminDashboard = () => {
         return;
       }
 
-      const fieldId = fieldDetails.fieldId;
+      const fieldId = selectedField.field_id;
       const formData = new FormData();
       formData.append('name', fieldDetails.name);
       formData.append('details', fieldDetails.description);
@@ -236,9 +227,26 @@ const AdminDashboard = () => {
 
   return (
     <Container className="mt-4 text-white">
-      {/* عرض اسم الملعب في المنتصف */}
-      <h2 className="text-center mb-3" style={{ fontWeight: 'bold' }}>{fieldName}</h2>
-
+      {/* عرض اختيار الملعب */}
+      <h2 className="text-center mb-3" style={{ fontWeight: 'bold' }}>لوحة تحكم المدير</h2>
+      <Form.Group>
+        <Form.Label>اختيار الملعب</Form.Label>
+        <Form.Control
+          as="select"
+          value={selectedField ? selectedField.field_id : ''}
+          onChange={(e) => {
+            const fieldId = e.target.value;
+            const field = fields.find(f => f.field_id === fieldId);
+            setSelectedField(field);
+          }}
+        >
+          {fields.map((field) => (
+            <option key={field.field_id} value={field.field_id}>
+              {field.name}
+            </option>
+          ))}
+        </Form.Control>
+      </Form.Group>
 
       <div className="d-flex justify-content-between mb-3">
         <Button variant="secondary" onClick={() => handleWeekChange(-1)}>الأسبوع السابق</Button>
@@ -270,13 +278,17 @@ const AdminDashboard = () => {
                 return (
                   <td key={i} className={booking ? 'bg-danger text-white' : 'bg-success text-dark'}>
                     {booking ? (
-                      <>
-                        محجوز <br />
-                        <Button variant="danger" onClick={() => handleCancelBooking(weekDates[i].toISOString().split('T')[0], hour)}>
-                          إلغاء الحجز
-                        </Button>
-                      </>
-                    ) : 'متاح'}
+                      <Button variant="danger" onClick={() => handleCancelBooking(weekDates[i].toISOString().split('T')[0], hour)}>
+                        إلغاء
+                      </Button>
+                    ) : (
+                      <Button variant="success" onClick={() => {
+                        setNewBooking({ day: weekDates[i].toISOString().split('T')[0], hour });
+                        setShowModal(true);
+                      }}>
+                        حجز
+                      </Button>
+                    )}
                   </td>
                 );
               })}
@@ -285,7 +297,7 @@ const AdminDashboard = () => {
         </tbody>
       </Table>
 
-      {/* نافذة إضافة حجز */}
+      {/* إضافة حجز Modal */}
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>إضافة حجز</Modal.Title>
@@ -293,47 +305,49 @@ const AdminDashboard = () => {
         <Modal.Body>
           <Form onSubmit={handleAddBooking}>
             <Form.Group>
-              <Form.Label>اليوم</Form.Label>
+              <Form.Label>اختر اليوم</Form.Label>
               <Form.Control
                 as="select"
+                name="day"
                 value={newBooking.day}
-                onChange={(e) => setNewBooking({ ...newBooking, day: e.target.value })}
+                onChange={handleBookingChange}
               >
-                {days.map((day, index) => (
-                  <option key={index} value={weekDates[index].toISOString().split('T')[0]}>
-                    {day}
+                {weekDates.map((date, i) => (
+                  <option key={i} value={date.toISOString().split('T')[0]}>
+                    {days[i]} - {date.toISOString().split('T')[0]}
                   </option>
                 ))}
               </Form.Control>
             </Form.Group>
+
             <Form.Group>
-              <Form.Label>الساعة</Form.Label>
+              <Form.Label>اختر الساعة</Form.Label>
               <Form.Control
                 as="select"
+                name="hour"
                 value={newBooking.hour}
-                onChange={(e) => setNewBooking({ ...newBooking, hour: e.target.value })}
+                onChange={handleBookingChange}
               >
-                {hours.map((hour, index) => (
-                  <option key={index} value={hour}>
-                    {hour}
-                  </option>
+                {hours.map((hour) => (
+                  <option key={hour} value={hour}>{hour}</option>
                 ))}
               </Form.Control>
             </Form.Group>
-            <Button type="submit" variant="success" className="mt-3" disabled={!isBookingAvailable(newBooking.day, newBooking.hour)}>
-              حجز
-            </Button>
+
+            {error && <Alert variant="danger">{error}</Alert>}
+
+            <Button variant="primary" type="submit" block>إضافة حجز</Button>
           </Form>
         </Modal.Body>
       </Modal>
 
-      {/* نافذة تعديل تفاصيل الملعب */}
+      {/* تعديل تفاصيل الملعب Modal */}
       <Modal show={showEditModal} onHide={() => setShowEditModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>تعديل تفاصيل الملعب</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form onSubmit={handleEditFieldDetails}>
+          <Form>
             <Form.Group>
               <Form.Label>اسم الملعب</Form.Label>
               <Form.Control
@@ -342,6 +356,7 @@ const AdminDashboard = () => {
                 onChange={(e) => setFieldDetails({ ...fieldDetails, name: e.target.value })}
               />
             </Form.Group>
+
             <Form.Group>
               <Form.Label>وصف الملعب</Form.Label>
               <Form.Control
@@ -351,21 +366,23 @@ const AdminDashboard = () => {
                 onChange={(e) => setFieldDetails({ ...fieldDetails, description: e.target.value })}
               />
             </Form.Group>
+
             <Form.Group>
-              <Form.Label>صور الملعب</Form.Label>
+              <Form.Label>الصور</Form.Label>
               {fieldDetails.images.map((image, index) => (
-                <div key={index}>
-                  <Form.Control
-                    type="file"
-                    name={index}
-                    onChange={handleImageChange}
-                    accept="image/*"
-                  />
-                  {image && <img src={URL.createObjectURL(image)} alt={`صورة ${index}`} width="100" />}
-                </div>
+                <Form.Control
+                  key={index}
+                  type="file"
+                  name={index}
+                  onChange={handleImageChange}
+                  accept="image/*"
+                />
               ))}
             </Form.Group>
-            <Button variant="primary" type="submit" className="mt-3">حفظ التعديلات</Button>
+
+            {error && <Alert variant="danger">{error}</Alert>}
+
+            <Button variant="primary" onClick={handleEditFieldDetails} block>حفظ التعديلات</Button>
           </Form>
         </Modal.Body>
       </Modal>
