@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Form, Row, Col, Button } from 'react-bootstrap';
-import { fetchCities, fetchRegions } from '../../api/api';
+import { fetchRegions } from '../../api/apiRegions';
+import { fetchCities } from '../../api/apiCities';
 import { searchFields } from "../../api/apiFields"; 
 import "./Filters.css";
 

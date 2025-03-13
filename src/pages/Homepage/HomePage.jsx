@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import { Container, Row, Col } from "react-bootstrap";
 import FieldCard from "../../components/FieldCard/FieldCard";
 import Filters from "../../components/Filters/Filters";
-import { fetchRegions, fetchCities } from "../../api/api"; 
+import { fetchRegions, } from "../../api/apiRegions"; 
+import {  fetchCities } from "../../api/apiCities"; 
 import { fetchFields } from "../../api/apiFields"; 
 import "./HomePage.css";
 
