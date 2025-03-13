@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Container, Form, Button, Alert } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
-import {jwtDecode} from 'jwt-decode'; // التأكد من تثبيت مكتبة jwt-decode باستخدام npm
+import {jwtDecode} from 'jwt-decode';
 import './Login.css';
 
 const Login = () => {
@@ -59,13 +59,13 @@ const Login = () => {
       // التحقق من نوع المستخدم
       if (userData.user_type === 'field_owner') {
         alert('تم تسجيل الدخول بنجاح! يتم تحويلك إلى صفحة الإدارة.');
-        navigate('/admin'); // توجيه المستخدم إلى صفحة الإدارة
+        navigate('/admin'); 
       } else if (userData.user_type === 'site_owner') {
         alert('تم تسجيل الدخول بنجاح! يتم تحويلك إلى لوحة التحكم.');
-        navigate('/dashboard'); // توجيه المستخدم إلى لوحة التحكم
+        navigate('/dashboard'); 
       } else {
         alert('تم تسجيل الدخول بنجاح!');
-        navigate('/'); // توجيه المستخدم إلى الصفحة الرئيسية
+        navigate('/');
       }
     } catch (error) {
       setErrorMessage(error.message);
