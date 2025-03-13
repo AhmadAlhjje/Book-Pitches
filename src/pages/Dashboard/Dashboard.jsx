@@ -3,6 +3,7 @@ import { Container, Nav, Button } from 'react-bootstrap';
 import ExploreFields from '../ExploreFields/ExploreFields';
 import ManageUsers from '../ManageUsers/ManageUsers'; 
 import AddCityRegion from '../AddCityRegion/AddCityRegion';
+import './Dashboard.css'; 
 
 const Dashboard = () => {
   const [currentPage, setCurrentPage] = useState('manager'); // لتحديد الصفحة الافتراضية
@@ -15,59 +16,22 @@ const Dashboard = () => {
 
   const toggleSidebar = () => setIsSidebarOpen(prevState => !prevState); // تغيير حالة الشريط الجانبي
 
-  const sidebarStyle = {
-    width: '200px',
-    backgroundColor: '#343a40',
-    minHeight: '100vh',
-    color: 'white',
-    padding: '20px',
-    position: 'fixed',
-    top: 0,
-    right: 0,
-    zIndex: 1040,
-    boxShadow: '0 0 10px rgba(0, 0, 0, 0.5)',
-  };
-
-  const contentStyle = {
-    marginRight: isSidebarOpen ? '250px' : '0', // مسافة بجانب الشريط
-    width: '100%',
-    minHeight: '100vh',
-    backgroundColor: '#f8f9fa',
-    transition: 'margin-right 0.3s',
-    overflowX: 'auto', // التمرير الأفقي إذا كان الجدول عريضاً
-  };
-
   return (
-    <Container fluid className="p-0 d-flex">
+    <Container fluid className="dashboard-container">
       {/* زر التحكم في الشريط الجانبي للشاشات الصغيرة */}
-      <Button
-        className="d-md-none position-fixed"
-        onClick={toggleSidebar}
-        style={{
-          top: '10px',
-          right: '10px',
-          zIndex: 1050,
-          backgroundColor: '#343a40',
-          borderColor: '#343a40',
-          color: 'white',
-        }}
-      >
+      <Button className="sidebar-toggle-btn d-md-none" onClick={toggleSidebar}>
         ☰
       </Button>
 
       {/* الشريط الجانبي */}
-      <div
-        className={`d-md-block ${isSidebarOpen ? 'd-block' : 'd-none'}`}
-        style={sidebarStyle}
-      >
-        <h4 className="mb-4 text-center">لوحة التحكم</h4>
+      <div className={`sidebar ${isSidebarOpen ? 'open' : ''}`}>
+        <h4 className="sidebar-title">لوحة التحكم</h4>
         <Nav className="flex-column">
           {['manager', 'users', 'cityRegion'].map((page, index) => (
             <Nav.Link
               key={index}
               onClick={() => handlePageChange(page)}
-              className={`text-white mb-3 ${currentPage === page ? 'bg-primary p-2 rounded' : ''}`}
-              style={{ cursor: 'pointer' }}
+              className={`sidebar-link ${currentPage === page ? 'active' : ''}`}
             >
               {page === 'manager' && 'مدير الملاعب'}
               {page === 'users' && 'إدارة المستخدمين'}
@@ -78,7 +42,7 @@ const Dashboard = () => {
       </div>
 
       {/* المحتوى الرئيسي */}
-      <div className="content p-4" style={contentStyle}>
+      <div className={`content ${isSidebarOpen ? 'sidebar-open' : ''}`}>
         {currentPage === 'manager' && <ExploreFields />}
         {currentPage === 'users' && <ManageUsers />}
         {currentPage === 'cityRegion' && <AddCityRegion />}

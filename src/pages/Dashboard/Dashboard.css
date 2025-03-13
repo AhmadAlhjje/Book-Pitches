@@ -1,0 +1,95 @@
+/* ملف التنسيقات الخاص بلوحة التحكم */
+.dashboard-container {
+    display: flex;
+    padding: 0;
+  }
+  
+  /* زر التحكم في الشريط الجانبي للشاشات الصغيرة */
+  .sidebar-toggle-btn {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    z-index: 1050;
+    background-color: #343a40;
+    border: none;
+    color: white;
+    display: block;
+  }
+  
+  /* الشريط الجانبي */
+  .sidebar {
+    width: 200px;
+    background-color: #343a40;
+    min-height: 100vh;
+    color: white;
+    padding: 20px;
+    position: fixed;
+    top: 0;
+    right: -200px; /* مخفي افتراضيًا على الشاشات الصغيرة */
+    z-index: 1040;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    transition: right 0.3s;
+  }
+  
+  /* عند فتح الشريط الجانبي في الشاشات الصغيرة */
+  .sidebar.open {
+    right: 0;
+  }
+  
+  /* إظهار الشريط الجانبي افتراضيًا في الشاشات الكبيرة */
+  @media (min-width: 768px) {
+    .sidebar {
+      right: 0;
+    }
+  
+    .sidebar-toggle-btn {
+      display: none; /* إخفاء زر القائمة في الشاشات الكبيرة */
+    }
+  
+    .content {
+      margin-right: 200px; /* تحريك المحتوى ليكون بجانب الشريط */
+    }
+  }
+  
+  /* عنوان الشريط الجانبي */
+  .sidebar-title {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  /* روابط الشريط الجانبي */
+  .sidebar-link {
+    color: white;
+    text-decoration: none;
+    padding: 10px;
+    display: block;
+    cursor: pointer;
+    margin-bottom: 10px;
+  }
+  
+  .sidebar-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .sidebar-link.active {
+    background-color: #007bff;
+    padding: 10px;
+    border-radius: 5px;
+  }
+  
+  /* المحتوى الرئيسي */
+  .content {
+    flex-grow: 1;
+    width: 100%;
+    min-height: 100vh;
+    background-color: #f8f9fa;
+    padding: 20px;
+    transition: margin-right 0.3s;
+    overflow-x: auto;
+  }
+  
+  /* عند فتح الشريط الجانبي في الشاشات الصغيرة */
+  .content.sidebar-open {
+    margin-right: 200px;
+  }
+  
