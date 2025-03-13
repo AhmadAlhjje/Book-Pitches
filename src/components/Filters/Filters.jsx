@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Form, Row, Col, Button } from 'react-bootstrap';
-import { fetchCities, fetchRegions, searchFields } from '../../api/api';
+import { fetchCities, fetchRegions } from '../../api/api';
+import { searchFields } from "../../api/apiFields"; 
 import "./Filters.css";
 
 const Filters = ({ onSearch }) => {

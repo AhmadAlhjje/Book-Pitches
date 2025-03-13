@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Table, Button, Form, Modal, Row, Col } from 'react-bootstrap';
-import { fetchFields, fetchRegions, fetchCities , addField ,deleteField } from "../../api/api";
+import {  fetchRegions, fetchCities} from "../../api/api";
+import { fetchFields, addField ,deleteField } from "../../api/apiFields";
 
 const ExploreFields = () => {
   const [fields, setFields] = useState([]); 

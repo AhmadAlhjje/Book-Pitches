@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import { Container, Row, Col } from "react-bootstrap";
 import FieldCard from "../../components/FieldCard/FieldCard";
 import Filters from "../../components/Filters/Filters";
-import { fetchFields, fetchRegions, fetchCities } from "../../api/api"; // ✅ استيراد API
+import { fetchRegions, fetchCities } from "../../api/api"; 
+import { fetchFields } from "../../api/apiFields"; 
 import "./HomePage.css";
 
 const HomePage = () => {
