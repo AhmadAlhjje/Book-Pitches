@@ -7,22 +7,22 @@ import './Register.css';
 const Register = () => {
   const navigate = useNavigate(); // تابع يستخدم للتنقل بين الصفحات
   const [formData, setFormData] = useState({
-    name: '', // اسم المستخدم
-    phone_number: '', // رقم الهاتف
-    password: '', // كلمة المرور
-    confirmPassword: '', // تأكيد كلمة المرور
+    name: '', 
+    phone_number: '', 
+    password: '', 
+    confirmPassword: '', 
   });
   const [errorMessage, setErrorMessage] = useState(''); // رسالة الخطأ عند وجود مشكلة
   const [successMessage, setSuccessMessage] = useState(''); // رسالة النجاح عند إتمام التسجيل
 
   // تابع لتحديث بيانات النموذج عند تغيير المدخلات
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value }); // تحديث القيمة بناءً على الحقل الذي تغيّر
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // تابع للتحقق من صحة رقم الهاتف (يجب أن يحتوي على 10-15 رقماً)
+  // تابع للتحقق من صحة رقم الهاتف (يجب أن يحتوي على 10-8 رقماً)
   const validatephone_number = (phone_number) => {
-    const regex = /^[0-9]{10,15}$/; // التعبير النمطي للتحقق من أن الرقم يحتوي فقط على أرقام
+    const regex = /^[0-9]{8,10}$/; 
     return regex.test(phone_number); // يعيد true إذا كان الرقم صحيحًا، وfalse إذا لم يكن كذلك
   };
 
@@ -36,7 +36,7 @@ const Register = () => {
     }
   
     if (!validatephone_number(phone_number)) {
-      setErrorMessage('يرجى إدخال رقم هاتف صالح يحتوي على 10-15 رقمًا.');
+      setErrorMessage('يرجى إدخال رقم هاتف صالح يحتوي على 10-8 ارقام.');
       return;
     }
   
@@ -70,7 +70,6 @@ const Register = () => {
         throw new Error('حدث خطأ أثناء التسجيل');
       }
   
-      // استلام الاستجابة كنص
       const data = await response.text();
   
       // تحقق إذا كانت الاستجابة تحتوي على رسالة نجاح أو خطأ
@@ -94,9 +93,7 @@ const Register = () => {
     <Container fluid className="register-container">
       <div className="register-box">
         <h2 className="text-center text-white">التسجيل</h2>
-        {/* عرض رسالة الخطأ إذا كانت موجودة */}
         {errorMessage && <Alert variant="danger">{errorMessage}</Alert>}
-        {/* عرض رسالة النجاح إذا تمت عملية التسجيل بنجاح */}
         {successMessage && <Alert variant="success">{successMessage}</Alert>}
         <Form>
           <Form.Group className="mb-3">
