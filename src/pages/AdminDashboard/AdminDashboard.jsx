@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Container, Table, Button, Modal, Form, Alert } from 'react-bootstrap';
 import './AdminDashboard.css';
 
-// AdminDashboard: المكون الرئيسي لإدارة لوحة تحكم المدير
+
 const AdminDashboard = () => {
   const hours = ['08:00 صباحاً', '10:00 صباحاً', '12:00 ظهراً', '02:00 مساءً', '04:00 مساءً', '06:00 مساءً', '08:00 مساءً'];
   const days = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
@@ -13,7 +13,7 @@ const AdminDashboard = () => {
   const [fieldDetails, setFieldDetails] = useState({
     name: '',
     description: '',
-    images: [null, null, null, null], // مصفوفة لتخزين الصور
+    images: [null, null, null, null],
     fieldId: '',
   });
 
@@ -29,7 +29,7 @@ const AdminDashboard = () => {
         if (!token) return;
         const userId = JSON.parse(atob(token.split('.')[1])).id;
   
-        // جلب بيانات الملعب الخاص بالمستخدم
+        // جلب id الملعب الخاص بالمستخدم
         const fieldResponse = await fetch(`http://localhost:4000/field_owners/field_by_user/${userId}`, {
           headers: { 'Authorization': `Bearer ${token}` },
         });
