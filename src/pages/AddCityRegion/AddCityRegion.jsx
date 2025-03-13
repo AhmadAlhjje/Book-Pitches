@@ -1,34 +1,31 @@
 import React, { useState, useEffect } from 'react';
 import { Form, Button, Alert } from 'react-bootstrap';
+import { fetchCities ,addCity } from '../../api/apiCities'; 
+import { addRegion } from '../../api/apiRegions'; 
 
 const AddCityRegion = () => {
-  const [city, setCity] = useState(''); // لتخزين city_id (اختيار المدينة)
-  const [cityName, setCityName] = useState(''); // لتخزين اسم المدينة (إضافة مدينة جديدة)
-  const [region, setRegion] = useState(''); // لتخزين اسم المنطقة
-  const [message, setMessage] = useState(''); // لتخزين الرسائل الناتجة عن العمليات
-  const [isLoading, setIsLoading] = useState(false); // للتحكم في حالة التحميل
-  const [cities, setCities] = useState([]); // لتخزين قائمة المدن
+  const [city, setCity] = useState(''); 
+  const [cityName, setCityName] = useState(''); 
+  const [region, setRegion] = useState('');
+  const [message, setMessage] = useState(''); 
+  const [isLoading, setIsLoading] = useState(false); 
+  const [cities, setCities] = useState([]); 
 
-  const token = localStorage.getItem('token'); // الحصول على التوكن من localStorage
+  const token = localStorage.getItem('token'); 
 
-  // استدعاء المدن عند تحميل الصفحة
   useEffect(() => {
-    const fetchCities = async () => {
+    const getCities = async () => {
       try {
-        const response = await fetch('http://localhost:4000/cities');
-        const data = await response.json();
-        if (response.ok) {
-          setCities(data); // تخزين المدن في المتغير cities
-        } else {
-          setMessage('حدث خطأ أثناء تحميل المدن.');
-        }
+        const data = await fetchCities();
+        setCities(data); 
       } catch (error) {
-        setMessage('حدث خطأ أثناء الاتصال بالخادم.');
+        setMessage('حدث خطأ أثناء تحميل المدن.');
       }
     };
-
-    fetchCities();
+  
+    getCities();
   }, []);
+  
   // إضافة مدينة جديدة
   const handleAddCity = async (e) => {
     e.preventDefault();
@@ -36,77 +33,57 @@ const AddCityRegion = () => {
       setMessage('يرجى إدخال المدينة.');
       return;
     }
-
     setIsLoading(true);
-    const Cities = { name: cityName };
     try {
-      const response = await fetch('http://localhost:4000/cities', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(Cities),
-      });
-      const result = await response.text();
-
-      if (response.ok) {
-        setMessage('تم إضافة المدينة بنجاح!');
-        setCityName(''); // إعادة تعيين قيمة المدينة بعد الإضافة
-      } else {
-        setMessage(result || 'حدث خطأ أثناء إضافة المدينة.');
+      if (!token) {
+        setMessage('لم يتم العثور على التوكن، الرجاء تسجيل الدخول.');
+        return;
       }
+      await addCity(cityName, token); 
+      setMessage('تم إضافة المدينة بنجاح!');
+      setCityName(''); 
     } catch (error) {
-      setMessage('حدث خطأ أثناء الاتصال بالخادم.');
+      setMessage(error.message);
     } finally {
       setIsLoading(false);
     }
   };
 
   // إضافة منطقة جديدة بناءً على المدينة
-  const handleAddRegion = async (e) => {
-    e.preventDefault();
-    if (!region || !city) {
-      setMessage('يرجى إدخال المدينة والمنطقة.');
+const handleAddRegion = async (e) => {
+  e.preventDefault();
+  
+  if (!region || !city) {
+    setMessage('يرجى إدخال المدينة والمنطقة.');
+    return;
+  }
+  setIsLoading(true);
+  try {
+    if (!token) {
+      setMessage('لم يتم العثور على التوكن، الرجاء تسجيل الدخول.');
       return;
     }
+    // الحصول على اسم المدينة من خلال ال id
+    // هل هذه العملية اذا كانت باك افضل؟؟؟؟ ام هل سوف يكون هناك تحميل
+    const selectedCity = cities.find((c) => c.city_id === parseInt(city)); 
+    const cityName = selectedCity ? selectedCity.name : ''; 
 
-    setIsLoading(true);
-    try {
-      const selectedCity = cities.find((c) => c.city_id === parseInt(city)); // العثور على المدينة بناءً على city_id
-      const cityName = selectedCity ? selectedCity.name : ''; // الحصول على اسم المدينة
+    await addRegion(region, cityName, token); 
+    setMessage('تم إضافة المنطقة بنجاح!');
+    setRegion(''); 
+  } catch (error) {
+    console.error('خطأ أثناء الاتصال بالخادم:', error);
+    setMessage(error.message);
+  } finally {
+    setIsLoading(false);
+  }
+};
 
-      const response = await fetch('http://localhost:4000/regions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ name: region, city_name: cityName }), // إرسال اسم المنطقة واسم المدينة
-      });
-
-      const result = await response.text();
-
-      if (response.ok) {
-        setMessage('تم إضافة المنطقة بنجاح!');
-        setRegion(''); // إعادة تعيين قيمة المنطقة بعد الإضافة
-      } else {
-        setMessage(result || 'حدث خطأ أثناء إضافة المنطقة.');
-      }
-    } catch (error) {
-      console.error('خطأ أثناء الاتصال بالخادم:', error);
-      setMessage('حدث خطأ أثناء الاتصال بالخادم.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   return (
     <div style={{ maxWidth: '600px', margin: 'auto', backgroundColor: '#fff', padding: '20px', borderRadius: '8px', boxShadow: '0 0 10px rgba(0, 0, 0, 0.1)' }}>
       <h3 className="mb-4 text-center">إضافة مدينة ومنطقة</h3>
-
       {message && <Alert variant={message.includes('نجاح') ? 'success' : 'danger'}>{message}</Alert>}
-
       {/* نموذج إضافة مدينة */}
       <Form onSubmit={handleAddCity}>
         <Form.Group className="mb-3">
@@ -115,7 +92,7 @@ const AddCityRegion = () => {
             type="text"
             placeholder="أدخل اسم المدينة"
             value={cityName}
-            onChange={(e) => setCityName(e.target.value)} // تحديث قيمة اسم المدينة
+            onChange={(e) => setCityName(e.target.value)}
           />
         </Form.Group>
 
@@ -123,7 +100,6 @@ const AddCityRegion = () => {
           {isLoading ? 'جاري الإضافة...' : 'إضافة مدينة'}
         </Button>
       </Form>
-
       <hr />
 
       {/* نموذج إضافة منطقة */}
