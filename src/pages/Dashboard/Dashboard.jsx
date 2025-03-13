@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Container, Nav, Button } from 'react-bootstrap';
-import ExploreFields from '../ExploreFields/ExploreFields'; // صفحة مدير الملاعب
-import ManageUsers from '../ManageUsers/ManageUsers'; // صفحة إدارة المستخدمين
-import AddCityRegion from '../AddCityRegion/AddCityRegion'; // صفحة إضافة المدينة والمنطقة
+import ExploreFields from '../ExploreFields/ExploreFields';
+import ManageUsers from '../ManageUsers/ManageUsers'; 
+import AddCityRegion from '../AddCityRegion/AddCityRegion';
 
 const Dashboard = () => {
   const [currentPage, setCurrentPage] = useState('manager'); // لتحديد الصفحة الافتراضية

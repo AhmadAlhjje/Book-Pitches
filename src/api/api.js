@@ -16,7 +16,7 @@ export const registerUser = async (name, phone_number, password) => {
   });
 
   if (!response.ok) throw new Error("فشل في تسجيل المستخدم");
-  return response.text(); // إرجاع البيانات من الاستجابة (مثل معرف المستخدم أو رسالة نجاح)
+  return response.text();
 };
 
 // دالة لتسجيل الدخول
@@ -34,7 +34,7 @@ export const loginUser = async (phone_number, password) => {
   }
 
   const data = await response.json();
-  return data;  // إعادة البيانات (مثلاً: رمز التوكن أو تفاصيل المستخدم)
+  return data;  
 };
 
 
