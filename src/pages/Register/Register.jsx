@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Container, Form, Button, Alert } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 // import bcrypt from 'bcryptjs'; // استيراد مكتبة التشفير
-import { registerUser } from '../../api/api'; // استيراد دالة registerUser من ملف الـ API
+import { registerUser } from '../../api/apiRegister'; // استيراد دالة registerUser من ملف الـ API
 import './Register.css';
 
 const Register = () => {

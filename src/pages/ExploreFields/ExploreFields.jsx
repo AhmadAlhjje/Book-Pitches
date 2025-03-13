@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Table, Button, Form, Modal, Row, Col } from 'react-bootstrap';
+import { fetchFields, fetchRegions, fetchCities , addField ,deleteField } from "../../api/api";
 
 const ExploreFields = () => {
-  const [fields, setFields] = useState([]); // تخزين قائمة الملاعب
-  const [regions, setRegions] = useState([]); // تخزين قائمة المناطق
-  const [cities, setCities] = useState([]); // تخزين قائمة المدن
+  const [fields, setFields] = useState([]); 
+  const [regions, setRegions] = useState([]); 
+  const [cities, setCities] = useState([]); 
   const [filteredRegions, setFilteredRegions] = useState([]); // تخزين المناطق المفلترة حسب المدينة
   const [showModal, setShowModal] = useState(false); // حالة عرض نافذة إضافة ملعب جديد
   const [showDeleteModal, setShowDeleteModal] = useState(false); // حالة عرض نافذة تأكيد الحذف
@@ -22,7 +23,6 @@ const ExploreFields = () => {
     image4: null,
   });
 
-  // تحميل البيانات من الخادم عند التحميل الأولي للصفحة
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -30,11 +30,10 @@ const ExploreFields = () => {
       return;
     }
 
-    // جلب البيانات للملاعب، المناطق، والمدن من الخادم
     Promise.all([
-      fetch('http://localhost:4000/fields', { headers: { Authorization: `Bearer ${token}` } }).then((res) => res.json()),
-      fetch('http://localhost:4000/regions', { headers: { Authorization: `Bearer ${token}` } }).then((res) => res.json()),
-      fetch('http://localhost:4000/cities', { headers: { Authorization: `Bearer ${token}` } }).then((res) => res.json()),
+      fetchFields(),
+      fetchRegions(),
+      fetchCities(),
     ])
       .then(([fieldsData, regionsData, citiesData]) => {
         setFields(fieldsData);
@@ -43,7 +42,7 @@ const ExploreFields = () => {
       })
       .catch((error) => {
         console.error('خطأ أثناء جلب البيانات:', error);
-        setShowErrorModal(true); // عرض نافذة الخطأ
+        setShowErrorModal(true); 
       });
   }, []);
 
@@ -57,6 +56,7 @@ const ExploreFields = () => {
     }));
 
     // تصفية المناطق بناءً على المدينة المحددة
+    // هل هذا يدب ان يكون في الباك؟؟؟؟؟
     if (name === 'city_id' && value) {
       const cityId = parseInt(value);
       const cityRegions = regions.filter((region) => region.city_id === cityId);
@@ -74,92 +74,47 @@ const ExploreFields = () => {
   };
 
   // إضافة ملعب جديد إلى النظام
-  // إضافة ملعب جديد إلى النظام
-const addField = (e) => {
-  e.preventDefault();  // منع التحديث التلقائي للصفحة
-
-  const token = localStorage.getItem('token');
-  if (!token) {
-    console.error('لم يتم العثور على الرمز. يرجى تسجيل الدخول.');
-    return;
-  }
-
-  const formData = new FormData();
-  formData.append('name', newField.name);
-  formData.append('region_id', newField.region_id);
-  formData.append('details', newField.details);
-  formData.append('city_id', newField.city_id);
-  formData.append('phone_number', newField.phone_number);
-
-  // إضافة الصور إذا كانت موجودة
-  if (newField.image1) formData.append('image1', newField.image1);
-  if (newField.image2) formData.append('image2', newField.image2);
-  if (newField.image3) formData.append('image3', newField.image3);
-  if (newField.image4) formData.append('image4', newField.image4);
-
-  // إرسال البيانات إلى الخادم
-  fetch('http://localhost:4000/fields', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-    body: formData,
-  })
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error('فشل في إضافة الملعب');
-      }
-      return response.json();
-    })
-    .then(() => {
-      // إعادة تحميل الصفحة
-      window.location.reload();  // إعادة تحميل الصفحة
-    })
-    .catch((error) => {
-      console.error('خطأ:', error);
-      setShowErrorModal(true); // عرض نافذة الخطأ
-    });
-};
-
+  const handleAddField = async (e) => {
+    e.preventDefault(); // منع التحديث التلقائي للصفحة
+    try {
+      await addField(newField);
+      window.location.reload();
+    } catch (error) {
+      setShowErrorModal(true); // عرض نافذة الخطأ في حالة الفشل
+    }
+  };
+  
 
   // حذف الملعب من النظام
-  const deleteField = (field_id) => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      console.error('لم يتم العثور على الرمز. يرجى تسجيل الدخول.');
-      return;
+const handleDeleteField = async (field_id) => {
+  try {
+    const success = await deleteField(field_id);
+    if (success) {
+      setFields((prevFields) => prevFields.filter((field) => field.field_id !== field_id));
     }
+  } catch (error) {
+    console.error("خطأ أثناء حذف الملعب:", error);
+  }
+};
 
-    fetch(`http://localhost:4000/fields/${field_id}`, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-    })
-      .then((response) => {
-        if (response.ok) {
-          setFields((prevFields) => prevFields.filter((field) => field.field_id !== field_id));
-        }
-      })
-      .catch((error) => console.error('خطأ أثناء حذف الملعب:', error));
-  };
 
   // تأكيد حذف الملعب
   const confirmDeleteField = () => {
     if (fieldToDelete) {
-      deleteField(fieldToDelete);
+      handleDeleteField(fieldToDelete);
       setShowDeleteModal(false);
     }
   };
 
   // الحصول على اسم المنطقة بناءً على معرف المنطقة
+  // هل هذا افضل اذا استخدمنا الباك؟؟؟ ام هكذا اسرع لكي لا يحمل مرتين
   const getRegionName = (region_id) => {
     const region = regions.find((region) => region.region_id === region_id);
     return region ? region.name : '';
   };
 
   // الحصول على اسم المدينة بناءً على معرف المنطقة
+  // هل هذا افضل اذا استخدمنا الباك؟؟؟ ام هكذا اسرع لكي لا يحمل مرتين
   const getCityNameByRegion = (region_id) => {
     const region = regions.find((region) => region.region_id === region_id);
     if (region) {
@@ -172,7 +127,6 @@ const addField = (e) => {
   return (
     <Container className="mt-5">
       <h2 className="text-center mb-4">لوحة تحكم المدير</h2>
-
       <h4 className="mb-4">جميع الملاعب</h4>
 
       <Table striped bordered hover variant="dark" responsive="sm">
@@ -194,6 +148,7 @@ const addField = (e) => {
               <td>{field.name}</td>
               <td>{getRegionName(field.region_id)}</td>
               <td>{getCityNameByRegion(field.region_id)}</td>
+              {/* بدا باك */}
               <td>{field.phone_number}</td>
               <td>{field.details}</td>
               <td>
@@ -351,7 +306,7 @@ const addField = (e) => {
           <Button variant="secondary" onClick={() => setShowModal(false)}>
             إغلاق
           </Button>
-          <Button variant="primary" onClick={addField}>
+          <Button variant="primary" onClick={handleAddField}>
             حفظ
           </Button>
         </Modal.Footer>

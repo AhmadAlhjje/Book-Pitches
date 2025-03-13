@@ -1,41 +1,5 @@
 export const BASE_URL = "http://localhost:4000";
 
-// دالة تسجيل المستخدم
-export const registerUser = async (name, phone_number, password) => {
-  const response = await fetch(`${BASE_URL}/users/register`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      name,
-      phone_number,
-      password,
-      user_type: 'regular',
-    }),
-  });
-
-  if (!response.ok) throw new Error("فشل في تسجيل المستخدم");
-  return response.text();
-};
-
-// دالة لتسجيل الدخول
-export const loginUser = async (phone_number, password) => {
-  const response = await fetch(`${BASE_URL}/users/login`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ phone_number, password }),
-  });
-
-  if (!response.ok) {
-    throw new Error('فشل في تسجيل الدخول');
-  }
-
-  const data = await response.json();
-  return data;  
-};
 
 
 //  دالة جلب جميع الملاعب
@@ -44,6 +8,69 @@ export const fetchFields = async () => {
   if (!response.ok) throw new Error("فشل في جلب بيانات الملاعب");
   return response.json();
 };
+
+// دالة اضافة ملعب 
+export const addField = async (newField) => {
+  const token = localStorage.getItem("token");
+  if (!token) {
+    console.error("لم يتم العثور على الرمز. يرجى تسجيل الدخول.");
+    return;
+  }
+  const formData = new FormData();
+  formData.append("name", newField.name);
+  formData.append("region_id", newField.region_id);
+  formData.append("details", newField.details);
+  formData.append("city_id", newField.city_id);
+  formData.append("phone_number", newField.phone_number);
+  // إضافة الصور إذا كانت موجودة
+  if (newField.image1) formData.append("image1", newField.image1);
+  if (newField.image2) formData.append("image2", newField.image2);
+  if (newField.image3) formData.append("image3", newField.image3);
+  if (newField.image4) formData.append("image4", newField.image4);
+  try {
+    const response = await fetch(`${BASE_URL}/fields`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: formData,
+    });
+    if (!response.ok) {
+      throw new Error("فشل في إضافة الملعب");
+    }
+    return await response.json();
+  } catch (error) {
+    console.error("خطأ:", error);
+    throw error;
+  }
+};
+
+
+// دالة حذف ملعب
+export const deleteField = async (field_id) => {
+  const token = localStorage.getItem("token");
+  if (!token) {
+    console.error("لم يتم العثور على الرمز. يرجى تسجيل الدخول.");
+    return;
+  }
+  try {
+    const response = await fetch(`${BASE_URL}/fields/${field_id}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!response.ok) {
+      throw new Error("فشل في حذف الملعب");
+    }
+    return true; // نجاح الحذف
+  } catch (error) {
+    console.error("خطأ أثناء حذف الملعب:", error);
+    throw error;
+  }
+};
+
 
 //  دالة جلب جميع المناطق
 export const fetchRegions = async () => {

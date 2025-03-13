@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Container, Form, Button, Alert } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
-import { loginUser } from '../../api/api'; // استيراد دالة loginUser من ملف API
+import { loginUser , getUserData } from '../../api/apiLogin'; // استيراد دالة loginUser من ملف API
 import { jwtDecode } from 'jwt-decode';
 import './Login.css';
 
@@ -16,36 +16,30 @@ const Login = () => {
 
   const handleLogin = async () => {
     const { phone_number, password } = credentials;
-
+  
     if (!phone_number || !password) {
       setErrorMessage('يرجى ملء جميع الحقول.');
       return;
     }
-
+  
     try {
       // استخدام دالة loginUser من API
       const data = await loginUser(phone_number, password);
-
-      // تخزين التوكن في localStorage
       localStorage.setItem('token', data.token);
-
+  
       // استخراج الـ id من التوكن
       const decodedToken = jwtDecode(data.token);
       const userId = decodedToken.id;
-
-      // إرسال طلب للتحقق من نوع المستخدم
-      const userResponse = await fetch(`http://localhost:4000/users/${userId}`, {
-        headers: {
-          'Authorization': `Bearer ${data.token}`,
-        },
-      });
-
-      const userData = await userResponse.json();
-
-      if (!userResponse.ok) {
-        throw new Error(userData.message || 'فشل في التحقق من بيانات المستخدم.');
+      const token = localStorage.getItem('token');
+      
+      if (!token) {
+        setErrorMessage('لم يتم العثور على التوكن.');
+        return;
       }
-
+  
+      // استدعاء دالة API لبيانات المستخدم باستخدام التوكن
+      const userData = await getUserData(userId, token);
+  
       // التحقق من نوع المستخدم
       if (userData.user_type === 'field_owner') {
         alert('تم تسجيل الدخول بنجاح! يتم تحويلك إلى صفحة الإدارة.');
@@ -61,6 +55,7 @@ const Login = () => {
       setErrorMessage(error.message);
     }
   };
+  
 
   return (
     <Container fluid className="login-container">
