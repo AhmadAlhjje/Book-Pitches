@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Container, Form, Button, Alert } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 // import bcrypt from 'bcryptjs'; // استيراد مكتبة التشفير
+import { registerUser } from '../../api/api'; // استيراد دالة registerUser من ملف الـ API
 import './Register.css';
 
 const Register = () => {
@@ -50,29 +51,10 @@ const Register = () => {
       return;
     }
   
-    // const hashedPassword = bcrypt.hashSync(password, 10);
-  
     try {
-      const response = await fetch('http://localhost:4000/users/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name,
-          phone_number,
-          password,
-          user_type: 'regular',
-        }),
-      });
+      // استخدم دالة registerUser بدلاً من fetch
+      const data = await registerUser(name, phone_number, password);
   
-      if (!response.ok) {
-        throw new Error('حدث خطأ أثناء التسجيل');
-      }
-  
-      const data = await response.text();
-  
-      // تحقق إذا كانت الاستجابة تحتوي على رسالة نجاح أو خطأ
       if (data === "User registered") {
         setSuccessMessage('تم التسجيل بنجاح! سيتم توجيهك إلى صفحة تسجيل الدخول.');
         setErrorMessage('');
@@ -87,6 +69,7 @@ const Register = () => {
       console.error(error);
     }
   };
+  
   
 
   return (

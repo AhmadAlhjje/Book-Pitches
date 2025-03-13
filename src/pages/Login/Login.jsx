@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Container, Form, Button, Alert } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
-import {jwtDecode} from 'jwt-decode';
+import { loginUser } from '../../api/api'; // استيراد دالة loginUser من ملف API
+import { jwtDecode } from 'jwt-decode';
 import './Login.css';
 
 const Login = () => {
@@ -22,19 +23,8 @@ const Login = () => {
     }
 
     try {
-      const response = await fetch('http://localhost:4000/users/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ phone_number, password }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'حدث خطأ أثناء تسجيل الدخول.');
-      }
+      // استخدام دالة loginUser من API
+      const data = await loginUser(phone_number, password);
 
       // تخزين التوكن في localStorage
       localStorage.setItem('token', data.token);
@@ -59,10 +49,10 @@ const Login = () => {
       // التحقق من نوع المستخدم
       if (userData.user_type === 'field_owner') {
         alert('تم تسجيل الدخول بنجاح! يتم تحويلك إلى صفحة الإدارة.');
-        navigate('/admin'); 
+        navigate('/admin');
       } else if (userData.user_type === 'site_owner') {
         alert('تم تسجيل الدخول بنجاح! يتم تحويلك إلى لوحة التحكم.');
-        navigate('/dashboard'); 
+        navigate('/dashboard');
       } else {
         alert('تم تسجيل الدخول بنجاح!');
         navigate('/');

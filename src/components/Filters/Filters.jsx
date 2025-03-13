@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Form, Row, Col, Button } from 'react-bootstrap';
+import { fetchCities, fetchRegions, searchFields } from '../../api/api';
 import "./Filters.css";
 
 const Filters = ({ onSearch }) => {
@@ -9,82 +10,40 @@ const Filters = ({ onSearch }) => {
   const [filters, setFilters] = useState({ name: "", city: "", region: "" });
 
   useEffect(() => {
-    const fetchCities = async () => {
+    const fetchData = async () => {
       try {
-        const response = await fetch('http://localhost:4000/cities');
-        const data = await response.json();
-        if (response.ok) {
-          setCities(data);
-        } else {
-          setError('حدث خطأ أثناء جلب المدن.');
-        }
+        const [regionsData, citiesData] = await Promise.all([
+                  fetchRegions(),
+                  fetchCities(),
+                ]);
+        setCities(citiesData);
+        setRegions(regionsData);
       } catch (error) {
-        setError('حدث خطأ أثناء الاتصال بالخادم.');
+        setError('حدث خطأ أثناء جلب البيانات.');
       }
     };
-
-    fetchCities();
+    fetchData();
   }, []);
 
-  useEffect(() => {
-    const fetchRegions = async () => {
-      try {
-        const response = await fetch('http://localhost:4000/regions');
-        const data = await response.json();
-        if (response.ok) {
-          setRegions(data);
-        } else {
-          setError('حدث خطأ أثناء جلب المناطق.');
-        }
-      } catch (error) {
-        setError('حدث خطأ أثناء الاتصال بالخادم.');
-      }
-    };
 
-    fetchRegions();
-  }, []);
-  
   const getCityIdByName = (cityName) => {
     const city = cities.find(city => city.name === cityName);
     return city ? city.city_id : null;
   };
-
   const filteredRegions = regions.filter(region => region.city_id === getCityIdByName(filters.city));
 
-  // 🔹 تحديث حالة الفلاتر فقط بدون تنفيذ البحث التلقائي
   const handleFilterChange = (event) => {
     setFilters({ ...filters, [event.target.name]: event.target.value });
   };
 
-  // 🔹 البحث فقط عند النقر على زر البحث
   const handleSearch = async () => {
     try {
-      const url = new URL('http://localhost:4000/fields/search');
-      const token = localStorage.getItem('token');
-      const params = new URLSearchParams({
-        field_name: filters.name,
-        city_name: filters.city,
-        region_name: filters.region,
-      });
-
-      const response = await fetch(`${url}?${params.toString()}`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (response.status === 404) {
+      const data = await searchFields(filters);
+      if (data.length === 0) {
         setError("لا يوجد ملاعب.");
-        onSearch([]);
-        return;
+      } else {
+        setError(null);
       }
-
-      if (!response.ok) throw new Error('فشل في جلب البيانات');
-      
-      const data = await response.json();
-      setError(null);
       onSearch(data);
     } catch (error) {
       console.error('Error fetching fields:', error);
@@ -103,7 +62,7 @@ const Filters = ({ onSearch }) => {
               placeholder="ابحث حسب اسم الملعب..."
               name="name"
               value={filters.name}
-              onChange={handleFilterChange}  // ✅ لا يتم البحث تلقائيًا
+              onChange={handleFilterChange} 
             />
           </Col>
           <Col md={4}>
@@ -111,7 +70,7 @@ const Filters = ({ onSearch }) => {
             <Form.Select
               name="city"
               value={filters.city}
-              onChange={handleFilterChange}  // ✅ لا يتم البحث تلقائيًا
+              onChange={handleFilterChange}  
             >
               <option value="">الكل</option>
               {cities.map((city) => (
@@ -126,7 +85,7 @@ const Filters = ({ onSearch }) => {
             <Form.Select
               name="region"
               value={filters.region}
-              onChange={handleFilterChange}  // ✅ لا يتم البحث تلقائيًا
+              onChange={handleFilterChange} 
             >
               <option value="">الكل</option>
               {filteredRegions.map((region) => (
@@ -144,7 +103,7 @@ const Filters = ({ onSearch }) => {
               <Button
                 variant="success"
                 className="w-25"
-                onClick={handleSearch}  // ✅ البحث يتم فقط عند النقر على الزر
+                onClick={handleSearch} 
               >
                 بحث
               </Button>
