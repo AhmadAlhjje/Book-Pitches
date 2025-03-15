@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Carousel, Button, Modal } from 'react-bootstrap';
+import { fetchRegions } from '../../api/apiRegions';
+import { fetchCities } from '../../api/apiCities';
+import { fetchFields } from '../../api/apiFields'; 
+import {BASE_URL} from '../../api/api'
 import './FieldDetails.css';
 
 const FieldDetails = () => {
@@ -27,56 +31,38 @@ const FieldDetails = () => {
   };
 
   useEffect(() => {
-    const fetchRegionsData = async () => {
+    const fetchData = async () => {
       try {
-        const response = await fetch('http://localhost:4000/regions');
-        if (!response.ok) throw new Error(`خطأ في الاستجابة! الحالة: ${response.status}`);
-        const regionsData = await response.json();
+        // جلب بيانات المناطق
+        const regionsData = await fetchRegions();
         setRegions(regionsData);
-      } catch (err) {
-        console.error('خطأ في جلب بيانات المناطق:', err);
-        setError(err.message);
-      }
-    };
-    fetchRegionsData();
-  }, []);
-
-  useEffect(() => {
-    const fetchCitiesData = async () => {
-      try {
-        const response = await fetch('http://localhost:4000/cities');
-        if (!response.ok) throw new Error(`خطأ في الاستجابة! الحالة: ${response.status}`);
-        const citiesData = await response.json();
+  
+        // جلب بيانات المدن
+        const citiesData = await fetchCities();
         setCities(citiesData);
-      } catch (err) {
-        console.error('خطأ في جلب بيانات المدن:', err);
-        setError(err.message);
-      }
-    };
-    fetchCitiesData();
-  }, []);
-
-  useEffect(() => {
-    const fetchFieldData = async () => {
-      try {
-        const response = await fetch('http://localhost:4000/fields');
-        if (!response.ok) throw new Error(`خطأ في الاستجابة! الحالة: ${response.status}`);
-        const fields = await response.json();
+  
+        // جلب بيانات الملاعب والبحث عن الملعب المطلوب
+        const fields = await fetchFields();
         const selectedField = fields.find((field) => field.field_id === parseInt(id, 10));
         if (!selectedField) throw new Error('لم يتم العثور على الملعب المطلوب');
         setField(selectedField);
+        // console.log(fields)
+  
       } catch (err) {
-        console.error('خطأ في جلب بيانات الملعب:', err);
+        console.error('خطأ في جلب البيانات:', err);
         setError(err.message);
       }
     };
-    fetchFieldData();
-  }, [id]);
+  
+    fetchData();
+  }, [id]); 
+  
+
 
   const handleBooking = () => {
-    const token = localStorage.getItem('token'); // ✅ التحقق من تسجيل الدخول
+    const token = localStorage.getItem('token');
     if (!token) {
-      setShowModal(true); // ✅ إظهار النافذة المنبثقة عند عدم تسجيل الدخول
+      setShowModal(true);
     } else {
       navigate(`/field/${field.field_id}/booking`);
     }
@@ -95,14 +81,14 @@ const FieldDetails = () => {
       <Row>
         <Col md={8} className="mb-4">
           <Carousel className="field-carousel shadow">
-            {[field.image1, field.image2, field.image3]
+            {[field.image2, field.image3, field.image4]
               .filter(image => image)
               .map((image, index) => (
                 <Carousel.Item key={index}>
                   <img
                     className="d-block w-100 carousel-image"
-                    src={`http://localhost:4000/uploads/${image.split('\\').pop()}`}
-                    alt={`صورة للملعب ${index + 1}`}
+                    src={`${BASE_URL}/uploads/${image.split('\\').pop()}`}
+                    alt={`صورة للملعب ${index + 2}`}
                   />
                 </Carousel.Item>
               ))}
