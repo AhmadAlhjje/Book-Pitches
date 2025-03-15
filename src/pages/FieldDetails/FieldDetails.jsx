@@ -46,7 +46,6 @@ const FieldDetails = () => {
         const selectedField = fields.find((field) => field.field_id === parseInt(id, 10));
         if (!selectedField) throw new Error('لم يتم العثور على الملعب المطلوب');
         setField(selectedField);
-        // console.log(fields)
   
       } catch (err) {
         console.error('خطأ في جلب البيانات:', err);
