@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Table, Button, Modal, Form, Alert } from 'react-bootstrap';
+import {fetchFieldByUser,fetchFieldById,editFieldDetails} from '../../api/apiFields'
+import { addBooking,cancelBooking,fetchBookingsByField } from '../../api/apiReservations'; 
 import './AdminDashboard.css';
 
 
@@ -23,57 +25,52 @@ const AdminDashboard = () => {
   const [showEditModal, setShowEditModal] = useState(false);
 
   useEffect(() => {
+    // دالة رئيسية لجلب بيانات الملعب والحجوزات
     const fetchFieldAndBookings = async () => {
       try {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem("token");
         if (!token) return;
-        const userId = JSON.parse(atob(token.split('.')[1])).id;
-  
-        // جلب id الملعب الخاص بالمستخدم
-        const fieldResponse = await fetch(`http://localhost:4000/field_owners/field_by_user/${userId}`, {
-          headers: { 'Authorization': `Bearer ${token}` },
-        });
-        const fieldData = await fieldResponse.json();
-        
-        // جلب جميع الملاعب من API
-        const fieldsResponse = await fetch(`http://localhost:4000/fields/${fieldData.field_id}`);
-        const fieldsData = await fieldsResponse.json();
-  
-        // البحث عن اسم الملعب المطابق
-        const matchedField = fieldsData;
-  
+        const userId = JSON.parse(atob(token.split(".")[1])).id;
+    
+        // جلب بيانات الملعب الخاص بالمستخدم
+        const fieldData = await fetchFieldByUser(userId, token);
+    
+        // جلب بيانات الملعب
+        const matchedField = await fetchFieldById(fieldData.field_id);
+    
         setFieldDetails(prev => ({
           ...prev,
           fieldId: fieldData.field_id,
-          name: matchedField ? matchedField.name : 'غير معروف',
-          description: fieldData.description,
-          image: fieldData.image || null,
+          name: matchedField ? matchedField.name : "غير معروف",
+          description: matchedField.details,
+          image1: matchedField.image1,
+          image2: matchedField.image2 ||null,
+          image3: matchedField.image3 ||null,
+          image4: matchedField.image4 ||null,
         }));
-  
-        // جلب الحجوزات الخاصة بالملعب
-        const bookingsResponse = await fetch(`http://localhost:4000/reservations/field/${fieldData.field_id}`, {
-          headers: { 'Authorization': `Bearer ${token}` },
-        });
-        const bookingsData = await bookingsResponse.json();
+        // جلب الحجوزات
+        const bookingsData = await fetchBookingsByField(fieldData.field_id, token);
         setBookings(bookingsData);
-        setFieldName(matchedField ? matchedField.name : 'غير معروف');
-  
+        setFieldName(matchedField ? matchedField.name : "غير معروف");
+    
       } catch (error) {
-        console.error('فشل في جلب بيانات الملعب والحجوزات:', error);
-        setError('فشل في جلب بيانات الملعب والحجوزات.');
+        console.error("فشل في جلب بيانات الملعب والحجوزات:", error);
+        setError("فشل في جلب بيانات الملعب والحجوزات.");
       }
     };
-  
+
     fetchFieldAndBookings();
-  }, []);
+  }, [setFieldDetails, setBookings, setFieldName, setError]);
   
 
+  // يرجع تاريخ بدالة الاسبوع
   const getWeekStart = (date) => {
     const day = date.getDay();
     const diff = date.getDate() - day;
     return new Date(date.setDate(diff));
   };
 
+  // يرجع مصفوفة فيها جميع ايام الاسبوع بدا من اليوم الحالي
   const weekStart = getWeekStart(new Date(currentWeek));
   const weekDates = Array.from({ length: 7 }, (_, i) => {
     const date = new Date(weekStart);
@@ -81,16 +78,17 @@ const AdminDashboard = () => {
     return date;
   });
 
+  // للتنقل بين الاسابيع (التالي او السابق)
   const handleWeekChange = (direction) => {
     const newWeek = new Date(weekStart);
     newWeek.setDate(weekStart.getDate() + direction * 7);
     setCurrentWeek(newWeek);
   };
 
+  // للتاكد اذا كان هناك حجز ما في الوقت واليوم المحددين
   const isBookingAvailable = (day, hour) => {
     return !bookings.some(booking => booking.date === day && booking.time === hour);
   };
-
   const handleBookingChange = (e) => {
     const { name, value } = e.target;
     setNewBooking(prev => ({ ...prev, [name]: value }));
@@ -105,125 +103,83 @@ const AdminDashboard = () => {
     }
   };  
 
-  const handleAddBooking = async (e) => {
-    e.preventDefault();
-    const { day, hour } = newBooking;
-
-    if (!day || !hour) {
-      setError('يرجى اختيار اليوم والساعة.');
+// دالة لمعالجة عملية إضافة حجز جديد
+const handleAddBooking = async (e) => {
+  e.preventDefault();
+  const { day, hour } = newBooking;
+  if (!day || !hour) {
+    setError('يرجى اختيار اليوم والساعة.');
+    return;
+  }
+  if (!isBookingAvailable(day, hour)) {
+    setError('هذا الموعد محجوز مسبقًا. يرجى اختيار موعد آخر.');
+    return;
+  }
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setError('يرجى تسجيل الدخول أولاً.');
       return;
     }
+    const userId = JSON.parse(atob(token.split('.')[1])).id;
+    const fieldId = fieldDetails.fieldId;
+    const bookingData = {
+      time: hour,
+      date: new Date(day),
+      field_id: fieldId,
+      user_id: userId,
+    };
+    await addBooking(bookingData, token); // استدعاء دالة ارسال الحجوزات
+    window.location.reload(); 
+  } catch (error) {
+    console.error('حدث خطأ أثناء إضافة الحجز:', error);
+    setError(error.message || 'حدث خطأ يرجى المحاولة لاحقًا.');
+  }
+};
 
-    if (!isBookingAvailable(day, hour)) {
-      setError('هذا الموعد محجوز مسبقًا. يرجى اختيار موعد آخر.');
+// دالة الغاء الحجوزات
+const handleCancelBooking = async (date, time) => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setError('يرجى تسجيل الدخول أولاً.');
       return;
     }
+    // استدعاء دالة cancelBooking لإلغاء الحجز
+    await cancelBooking(date, time, token);
+    // تحديث قائمة الحجوزات بعد نجاح الإلغاء
+    setBookings(bookings.filter(booking => !(booking.date === date && booking.time === time)));
+    setError('');
+  } catch (error) {
+    console.error('حدث خطأ أثناء إلغاء الحجز:', error);
+    setError(error.message || 'حدث خطأ يرجى المحاولة لاحقًا.');
+  }
+};
 
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        setError('يرجى تسجيل الدخول أولاً.');
-        return;
-      }
 
-      const userId = JSON.parse(atob(token.split('.')[1])).id;
-      const fieldId = fieldDetails.fieldId;
-
-      const bookingData = {
-        time: hour,
-        date: new Date(day),
-        field_id: fieldId,
-        user_id: userId,
-      };
-
-      const response = await fetch('http://localhost:4000/reservations', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify(bookingData),
-      });
-
-      if (response.ok) {
-        window.location.reload();
-      } else {
-        const errorData = await response.json();
-        setError(errorData.message || 'فشل في إضافة الحجز.');
-      }
-    } catch (error) {
-      console.error('حدث خطأ أثناء إضافة الحجز:', error);
-      setError('حدث خطأ يرجى المحاولة لاحقًا.');
+// دالة تعديل تفاصيل الملاعب
+// مو شغال
+const handleEditFieldDetails = async () => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setError('يرجى تسجيل الدخول أولاً.');
+      return;
     }
-  };
+    // استخراج معرف الملعب
+    const fieldId = fieldDetails.fieldId;
+    // استدعاء دالة editFieldDetails لإرسال التعديلات إلى API
+    await editFieldDetails(fieldId, fieldDetails, token);
+    setShowEditModal(false);
+    setError('');
+    window.location.reload();
+  } catch (error) {
+    console.error('فشل في تعديل تفاصيل الملعب:', error);
+    setError(error.message || 'حدث خطأ يرجى المحاولة لاحقًا.');
+  }
+};
 
-  const handleCancelBooking = async (date, time) => {
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        setError('يرجى تسجيل الدخول أولاً.');
-        return;
-      }
-
-      const response = await fetch(`http://localhost:4000/reservations`, {
-        method: 'DELETE',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({ date, time }),
-      });
-
-      if (response.ok) {
-        setBookings(bookings.filter(booking => !(booking.date === date && booking.time === time)));
-        setError('');
-      } else {
-        setError('فشل في إلغاء الحجز.');
-      }
-    } catch (error) {
-      console.error('حدث خطأ أثناء إلغاء الحجز:', error);
-      setError('حدث خطأ يرجى المحاولة لاحقًا.');
-    }
-  };
-
-  const handleEditFieldDetails = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        setError('يرجى تسجيل الدخول أولاً.');
-        return;
-      }
-
-      const fieldId = fieldDetails.fieldId;
-      const formData = new FormData();
-      formData.append('name', fieldDetails.name);
-      formData.append('details', fieldDetails.description);
-      fieldDetails.images.forEach((image, index) => {
-        if (image) {
-          formData.append(`image${index + 1}`, image);
-        }
-      });
-
-      const response = await fetch(`http://localhost:4000/fields/${fieldId}`, {
-        method: 'PUT',
-        headers: { 'Authorization': `Bearer ${token}` },
-        body: formData,
-      });
-      
-      if (response.ok) {
-        setShowEditModal(false);
-        setError('');
-        window.location.reload();
-      } else {
-        const errorData = await response.text();
-        setError(errorData.message || 'فشل في حفظ التعديلات.');
-      }
-    } catch (error) {
-      console.error('فشل في تعديل تفاصيل الملعب:', error);
-      setError('حدث خطأ يرجى المحاولة لاحقًا.');
-    }
-  };
-
+// تحديث قائمة الصور الخاصة بالملعب
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     const index = parseInt(e.target.name);
@@ -236,22 +192,15 @@ const AdminDashboard = () => {
 
   return (
     <Container className="mt-4 text-white">
-      {/* عرض اسم الملعب في المنتصف */}
       <h2 className="text-center mb-3" style={{ fontWeight: 'bold' }}>{fieldName}</h2>
-
-
       <div className="d-flex justify-content-between mb-3">
         <Button variant="secondary" onClick={() => handleWeekChange(-1)}>الأسبوع السابق</Button>
         <Button variant="success" onClick={() => setShowModal(true)}>إضافة حجز</Button>
         <Button variant="secondary" onClick={() => handleWeekChange(1)}>الأسبوع التالي</Button>
       </div>
-
       <h4 className="mb-3">الأسبوع: {weekStart.toISOString().split('T')[0]}</h4>
-
       {error && <Alert variant="danger">{error}</Alert>}
-
       <Button variant="warning" onClick={() => setShowEditModal(true)}>تعديل تفاصيل الملعب</Button>
-
       <Table bordered className="text-center table">
         <thead>
           <tr>

@@ -90,3 +90,56 @@ export const searchFields = async (filters) => {
     
     return response.json();
   };
+
+
+
+
+// دالة جلب id الملعب التابع للمستخدم من خلال id المستخدم
+export const fetchFieldByUser = async (userId, token) => {
+  const response = await fetch(`${BASE_URL}/field_owners/field_by_user/${userId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!response.ok) throw new Error("فشل في جلب بيانات الملعب الخاص بالمستخدم");
+  return response.json();
+};
+
+// دالة جلب بيانات الملعب المحدد
+export const fetchFieldById = async (fieldId) => {
+  const response = await fetch(`${BASE_URL}/fields/${fieldId}`);
+  if (!response.ok) throw new Error("فشل في جلب بيانات الملعب");
+  return response.json();
+};
+
+
+// دالة لتعديل تفاصيل الملعب عبر API
+export const editFieldDetails = async (fieldId, fieldDetails, token) => {
+  try {
+    // تجهيز البيانات باستخدام FormData لإرسال الصور والبيانات النصية
+    const formData = new FormData();
+    formData.append('name', fieldDetails.name);
+    formData.append('details', fieldDetails.description);
+    
+    // إضافة الصور إلى FormData إذا كانت موجودة
+    fieldDetails.images.forEach((image, index) => {
+      if (image) {
+        formData.append(`image${index + 1}`, image);
+      }
+    });
+
+    // إرسال الطلب إلى API لتحديث بيانات الملعب
+    const response = await fetch(`http://localhost:4000/fields/${fieldId}`, {
+      method: 'PUT',
+      headers: { 'Authorization': `Bearer ${token}` }, // إرسال التوكن فقط بدون Content-Type عند استخدام FormData
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.text();
+      throw new Error(errorData.message || 'فشل في حفظ التعديلات.');
+    }
+
+    return true; // إرجاع قيمة تدل على النجاح
+  } catch (error) {
+    throw error;
+  }
+};
