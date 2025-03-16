@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Form, Button } from 'react-bootstrap';
 import Calendar from 'react-calendar';
 import { useParams, useNavigate } from 'react-router-dom';
+import {fetchFields} from '../../api/apiFields'
+import {fetchBookingsByField,addBooking} from '../../api/apiReservations'
 import 'react-calendar/dist/Calendar.css';
 import './BookingPage.css';
 
@@ -21,54 +23,46 @@ const BookingPage = () => {
     '04:00 مساءً', '06:00 مساءً', '08:00 مساءً',
   ];
 
-  useEffect(() => {
-    const fetchFieldData = async () => {
-      try {
-        const response = await fetch('http://localhost:4000/fields');
-        const fields = await response.json();
-        const currentField = fields.find(field => field.field_id === parseInt(id));
-        setFieldData(currentField);
-      } catch (error) {
-        console.error('Error fetching field data:', error);
-      }
-    };
+  const token = localStorage.getItem('token');
+  const dateKey = selectedDate.toLocaleDateString('en-CA');
 
-    fetchFieldData();
-  }, [id]);
+useEffect(() => {
+  const fetchData = async () => {
+    try {
+      // **جلب بيانات الملعب**
+      const fields = await fetchFields();
+      const currentField = fields.find(field => field.field_id === parseInt(id, 10));
+      setFieldData(currentField);
 
-  useEffect(() => {
-    const fetchBookings = async () => {
-      try {
-        const response = await fetch(`http://localhost:4000/reservations/field/${id}`);
-        const data = await response.json();
-        const bookingsByDate = {};
+      // **جلب بيانات الحجوزات**
+      if (!token) throw new Error('لم يتم العثور على رمز المصادقة');
+      const data = await fetchBookingsByField(id, token);
+      const bookingsByDate = {};
+      data.forEach(booking => {
+        const { date, time } = booking;
+        const dateKey = new Date(date).toLocaleDateString('en-CA');
+        if (!bookingsByDate[dateKey]) bookingsByDate[dateKey] = [];
+        bookingsByDate[dateKey].push(time);
+      });
+      setBookedTimes(bookingsByDate);
+    } catch (error) {
+      setMessage({ type: 'error', text: 'حدث خطأ أثناء جلب البيانات. يرجى المحاولة لاحقاً.' });
+      console.error('Error fetching data:', error);
+    }
+  };
+  if (id) fetchData();
+}, [id, token]); 
 
-        data.forEach(booking => {
-          const { date, time } = booking;
-          const dateKey = new Date(date).toLocaleDateString('en-CA');
-          if (!bookingsByDate[dateKey]) bookingsByDate[dateKey] = [];
-          bookingsByDate[dateKey].push(time);
-        });
-
-        setBookedTimes(bookingsByDate);
-      } catch (error) {
-        setMessage({ type: 'error', text: 'حدث خطأ أثناء جلب بيانات الحجوزات. يرجى المحاولة لاحقاً.' });
-        console.error('Error fetching bookings:', error);
-      }
-    };
-
-    if (id) fetchBookings();
-  }, [id]);
 
   const handleDateChange = (date) => {
-    const correctedDate = new Date(date);
-    correctedDate.setHours(0, 0, 0, 0);
+    const correctedDate = new Date(date);// تحويل `date` إلى كائن `Date`
+    correctedDate.setHours(0, 0, 0, 0);// إعادة تعيين الوقت إلى منتصف الليل (00:00:00.000)
     setSelectedDate(correctedDate);
   };
 
   const handleTimeChange = (e) => setSelectedTime(e.target.value);
-
   const handlePaymentChange = (e) => setPaymentMethod(e.target.value);
+
 
   const handleBooking = async () => {
     if (!selectedTime) {
@@ -91,47 +85,36 @@ const BookingPage = () => {
       return;
     }
 
-    const dateKey = selectedDate.toLocaleDateString('en-CA');
+    
     if (bookedTimes[dateKey]?.includes(selectedTime)) {
       setMessage({ type: 'error', text: 'هذا الوقت محجوز مسبقاً. يرجى اختيار وقت آخر.' });
       return;
     }
 
-    const token = localStorage.getItem('token');
-    const formattedDate = selectedDate.toLocaleDateString('en-CA');
-    const userId = token ? JSON.parse(atob(token.split('.')[1])).id : null;
+    if (!token) {
+      setMessage({ type: 'error', text: 'يجب تسجيل الدخول لإتمام الحجز.' });
+      return;
+    }
 
+    const userId = JSON.parse(atob(token.split('.')[1])).id;
     const bookingDetails = {
       field_id: id,
-      date: formattedDate,
+      date: dateKey,
       time: selectedTime,
       user_id: userId,
     };
 
     try {
-      const response = await fetch('http://localhost:4000/reservations', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(bookingDetails),
+      const responseMessage = await addBooking(bookingDetails, token); 
+      setMessage({
+        type: 'success',
+        text: `تم تأكيد الحجز ليوم ${dateKey} في الساعة ${selectedTime}.`,
       });
-
-      const data = await response.text();
-
-      if (response.ok) {
-        setMessage({
-          type: 'success',
-          text: `تم تأكيد الحجز ليوم ${formattedDate} في الساعة ${selectedTime}.`,
-        });
-      } else {
-        setMessage({ type: 'error', text: data.message || 'حدث خطأ أثناء الحجز.' });
-      }
     } catch (error) {
-      setMessage({ type: 'error', text: "حدث خطأ أثناء الاتصال بالخادم." });
+      setMessage({ type: 'error', text: error.message || 'حدث خطأ أثناء الحجز.' });
     }
   };
+
 
   const handleCloseMessage = () => {
     if (message.type === 'success') {
@@ -142,19 +125,21 @@ const BookingPage = () => {
   };
 
   const getDateStatusClass = (date) => {
-    const dateKey = date.toLocaleDateString('en-CA');
     const currentDate = new Date().toLocaleDateString('en-CA');
-
     if (dateKey < currentDate) return 'past-date';
     if (bookedTimes[dateKey]) {
       const bookedTimesForDate = bookedTimes[dateKey];
+      // اليوم محجوز بالكامل
       if (bookedTimesForDate.length === timeSlots.length) return 'fully-booked';
+      // اليوم متاح بالكامل
       if (bookedTimesForDate.length === 0) return 'fully-available';
+      // متاح بعض الاوقات في اليوم
       return 'partially-available';
     }
     return 'fully-available';
   };
 
+  // تعطيل التواريخ قبل تاريخ اليوم
   const disablePastDates = ({ date }) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
