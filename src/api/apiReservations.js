@@ -1,4 +1,5 @@
 import {BASE_URL} from './api'
+import {jwtDecode} from 'jwt-decode';
 
 // دالة جلب الحجوزات الخاصة بالملعب
 export const fetchBookingsByField = async (fieldId, token) => {
@@ -54,3 +55,29 @@ export const cancelBooking = async (date, time, token) => {
     }
   };
   
+
+  // دالة جلب الحجوزات الختصة بشخض معين
+  export const fetchBookings = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        throw new Error('يجب تسجيل الدخول لعرض الحجوزات');
+    }
+    try {
+        const decodedToken = jwtDecode(token);
+        const userId = decodedToken.id;
+        const response = await fetch(`${BASE_URL}/reservations/user/${userId}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+        });
+        if (!response.ok) {
+            throw new Error('حدث خطأ أثناء تحميل البيانات.');
+        }
+        const data = await response.json();
+        return data.sort((a, b) => new Date(b.date) - new Date(a.date));
+    } catch (err) {
+        throw new Error(err.message || 'حدث خطأ أثناء تحميل البيانات.');
+    }
+};
