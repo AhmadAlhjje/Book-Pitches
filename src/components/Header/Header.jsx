@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Navbar, Nav, Button, Dropdown } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
-import { jwtDecode } from 'jwt-decode'; // استيراد jwt-decode لفك تشفير التوكن
+import { fetchUserData } from '../../api/apiUser'; 
 import './Header.css';
 
 const Header = () => {
@@ -11,40 +11,24 @@ const Header = () => {
   const [userPhone, setUserPhone] = useState('رقم الهاتف');
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      setIsLoggedIn(true);
-      const decodedToken = jwtDecode(token); // فك تشفير التوكن
-      const userId = decodedToken.id;
-
-      // جلب بيانات المستخدم من API
-      fetch(`http://localhost:4000/users/${userId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`, // إرسال التوكن في الهيدر
-        },
-      })
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error('فشل في جلب بيانات المستخدم.');
-          }
-          return response.json();
-        })
-        .then((data) => {
-          setUserName(data.name); // تحديث اسم المستخدم
-          setUserPhone(data.phone_number); // تحديث رقم الهاتف
-        })
-        .catch((error) => {
-          console.error(error);
-        });
-    } else {
-      setIsLoggedIn(false);
-    }
-  }, []);
+    const fetchUser = async () => {
+        try {
+            const userData = await fetchUserData();
+            setIsLoggedIn(true);
+            setUserName(userData.name);
+            setUserPhone(userData.phone_number);
+        } catch (error) {
+            console.error(error);
+            setIsLoggedIn(false);
+        }
+    };
+    fetchUser();
+}, []);
 
   const handleLogout = () => {
     localStorage.removeItem('token'); // إزالة التوكن عند تسجيل الخروج
     setIsLoggedIn(false);
-    navigate('/'); // إعادة التوجيه للصفحة الرئيسية
+    navigate('/'); 
   };
 
   return (
